@@ -10,11 +10,6 @@ int main(void) {
   int i;
   int theBigArray [ARRAY_SIZE][ARRAY_SIZE];
 
-  /* init the sumVertlines with it's starting value: 0 */
-  for (i = 0; i < ARRAY_SIZE; i++) {
-    sumVertVals[i] = 0;
-  }
-
 
   /* Get each row from the user */
   for (i = 0; i < ARRAY_SIZE; i++) {
@@ -35,6 +30,12 @@ void displayArrayAndSum(int theBigArray[ARRAY_SIZE][ARRAY_SIZE]) {
   int i, j, sumHorzVals = 0, sumVertVals[ARRAY_SIZE];
   char *linebreak = "-----------------------------------------\n";
   
+/* init the sumVertlines with it's starting value: 0 */
+  for (i = 0; i < ARRAY_SIZE; i++) {
+    sumVertVals[i] = 0;
+  }
+
+
   /* Print Values and Horizontal totals */
   printf("%s|",linebreak);
   for (i = 0; i < ARRAY_SIZE; i++) {

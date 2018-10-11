@@ -8,76 +8,89 @@
  */
 struct Student {
   int quizScores[NUMBER_QUIZ];
-  int totalScore, highScore, lowScore;
+  int totalScore;
   float avgScore;
 };
 
 /* Function Prototypes */
 int findHigh(int quizScores[NUMBER_QUIZ]);
 int findLow(int quizScores[NUMBER_QUIZ]);
-void getQuizScores(struct Student *indivStudent, int studentNum);
+void scanForQuizScores(struct Student *student, int studentIndex);
+void printStatistics (struct Student students [NUMBER_STUDENTS], float quizAvg[NUMBER_QUIZ]);
+
 
 int main(void) {
   int i, j; /* Index */
   struct Student students [NUMBER_STUDENTS];
   float quizAvg[NUMBER_QUIZ];
-  int quizHigh[NUMBER_QUIZ], quizLow[NUMBER_QUIZ], quizTotals[NUMBER_QUIZ];
-
+  int quizTotals[NUMBER_STUDENTS];
+  
+  
   /* Initialize quiz totals used to calculate average*/
   for (i = 0; i < NUMBER_QUIZ; i++) {
     quizTotals[i] = 0;
   }
 
+  /* Get the scores from the user and calculate relevant statistics*/
   for (i = 0; i < NUMBER_STUDENTS; i++) {
+    scanForQuizScores(&students[i], i);
+
     students[i].totalScore = 0;
-    getQuizScores(&students[i], i);
     for (j = 0; j < NUMBER_QUIZ; j++) {
       students[i].totalScore += students[i].quizScores[j];
       quizTotals[j] += students[i].quizScores[j];
     }
-
-    /* Individual Statistics */
-    students[i].highScore = findHigh(students[i].quizScores);
-    students[i].lowScore = findLow(students[i].quizScores);
     students[i].avgScore = students[i].totalScore/NUMBER_QUIZ;
+    quizAvg[i] = quizTotals[i]/NUMBER_STUDENTS;
   }
+  
+  /* Then print the value */
+ printStatistics(students, quizAvg);
 
 
-  
-  /* Quiz Statistics */
-  for (i = 0; i < NUMBER_QUIZ; i++) {
-    for (j = 0; j < NUMBER_STUDENTS; j++){
-      quizTotals[i] += student[j].quizScores[i];
-    }
-  }
-  quizAvg[i] = quizTotals[i]/NUMBER_STUDENTS;
-  quizLow
-  
+  return 0;
 }
 
-void getListOfStudentTestScore(struct Student *students[NUMBER_STUDENTS])
+void printStatistics (struct Student students[NUMBER_STUDENTS], float quizAvg[NUMBER_QUIZ]) {
+  int listOfScoresForTest[NUMBER_STUDENTS];
+  int i, j;
+
+  printf("\n\n\nStudent\tTotal Score\tAverage\n");
+  printf("---------------------------------\n");
+  for (i = 0; i < NUMBER_STUDENTS; i++) {
+    printf("%d\t%d\t\t%.2d\n", i+1, students[i].totalScore, students[i].totalScore/NUMBER_QUIZ);
+  }
+  printf("---------------------------------\n");
+  printf("For each quiz:\n");
+  printf("Quiz\tAverage Score\tHigh Score\tLow Score\n");
+  printf("---------------------------------\n");  
+  for (i = 0; i < NUMBER_QUIZ; i++) {
+    for (j = 0; j < NUMBER_STUDENTS; j++) {
+      listOfScoresForTest[j] = students[j].quizScores[i]; 
+    }
+    printf("%d\t%.2f\t\t", i+1, quizAvg[i]);
+    printf("%d\t\t", findHigh(listOfScoresForTest));
+    printf("%d\n", findLow(listOfScoresForTest));
+  }
+  printf("---------------------------------\n");    
+}
 
 
-/* For each student get their quiz scores
-   and add it to the total*/
-void getQuizScores(struct Student *indivStudent, int studentNum) {
+
+void scanForQuizScores(struct Student *student, int studentIndex) {
   int i;
-  for (i = 0; i < NUMBER_QUIZ; i++) {
-    printf("For student: %d, enter score for quiz %d : ", studentNum+1, i+1);
-    scanf("%d", &indivStudent->quizScores[i]);
-    if (indivStudent->quizScores[i] < 0) {
-      printf("A student can't get a negative score\n");
-      i--;
-      continue;
-    } else if (indivStudent->quizScores[i] > 100) {
-      printf("A student can't get a score greater than 100\n");
+  for(i = 0; i < NUMBER_QUIZ; i++) {
+    printf("Please enter Student %d's score for quiz %d : ", studentIndex+1, i+1);
+    scanf(" %d", &student->quizScores[i]);
+    if (student->quizScores[i] > 100 || student->quizScores[i] < 0) {
+      printf("Please enter another value(less than 100 and greater than 0\n");
       i--;
       continue;
     }
   }
 }
 
-int findHigh(int quizScores[NUMBER_QUIZ]) {
+int findHigh(int quizScores[NUMBER_STUDENTS]) {
   int i, highestScore = quizScores[0];
   for (i = 1; i < NUMBER_QUIZ; i++) {
     if (quizScores[i] > highestScore) {
@@ -87,10 +100,10 @@ int findHigh(int quizScores[NUMBER_QUIZ]) {
   return highestScore;
 }
 
-int findLow(int quizScores[NUMBER_QUIZ]) {
+int findLow(int quizScores[NUMBER_STUDENTS]) {
   int i, lowestScore = quizScores[0];
   for (i = 0; i < NUMBER_QUIZ; i++) {
-    if (quizScores[i] > lowestScore) {
+    if (quizScores[i] < lowestScore) {
       lowestScore = quizScores[i];
     }
   }
