@@ -25,7 +25,7 @@ int main(void) {
 
   /* Initialize quiz totals used to calculate average*/
   for (i = 0; i < NUMBER_QUIZ; i++) {
-    quizTotals = 0;
+    quizTotals[i] = 0;
   }
 
   for (i = 0; i < NUMBER_STUDENTS; i++) {
@@ -36,20 +36,26 @@ int main(void) {
       quizTotals[j] += students[i].quizScores[j];
     }
 
-    /* Individual Totals */
+    /* Individual Statistics */
     students[i].highScore = findHigh(students[i].quizScores);
     students[i].lowScore = findLow(students[i].quizScores);
     students[i].avgScore = students[i].totalScore/NUMBER_QUIZ;
   }
 
-  /* Quiz Totals */
-  for (i = 0; i < NUMBER_QUIZ; i++) {
-    
-    quizAvg[i] += ;
-  }
 
   
+  /* Quiz Statistics */
+  for (i = 0; i < NUMBER_QUIZ; i++) {
+    for (j = 0; j < NUMBER_STUDENTS; j++){
+      quizTotals[i] += student[j].quizScores[i];
+    }
+  }
+  quizAvg[i] = quizTotals[i]/NUMBER_STUDENTS;
+  quizLow
+  
 }
+
+void getListOfStudentTestScore(struct Student *students[NUMBER_STUDENTS])
 
 
 /* For each student get their quiz scores
