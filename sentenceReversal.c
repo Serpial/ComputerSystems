@@ -10,6 +10,7 @@
 int main(void) {
   char sentence[CHAR_SENTENCE_SIZE];
   char words [MAX_WORDS] [CHAR_NUM_WORDS];
+  char terminatingChar= '.';
   int goodChar = 0, numWords = 0, spaceOfBreak = -1;
   int i,j;
 
@@ -22,6 +23,7 @@ int main(void) {
   for (i = 0; i < CHAR_SENTENCE_SIZE; i++) {
     switch (sentence[i]) {
     case '!': case '?': case '.':
+      terminatingChar = sentence[i];
       spaceOfBreak = i;
     }
   }
@@ -30,25 +32,28 @@ int main(void) {
   if (spaceOfBreak != -1){
     for (i = 0; i < spaceOfBreak; i++) {
       if (sentence[i] == ' ') {
-        strcpy(words[numWords], words[numWords]+'\0');
-        numWords++;
-        if (sentence[i+1] != ' ') {
-          strcpy(words[numWords], sentence[i+1]+"");
-          printf("%c : %c\n", words[numWords][0], sentence[i+1]);
+        words[numWords++][goodChar] = '\0';
+        /* On to the next word */
+        if (sentence[i+1] != ' ' && spaceOfBreak != i+1) {
+          words[numWords][0] = sentence[++i];
+          goodChar = 1;
         }
       } else {
-        strcpy(words[numWords], words[numWords]+ sentence[i]);
+        words[numWords][goodChar++] = sentence[i];
       }
     }
+    words[numWords][goodChar] = '\0';
+
+    printf("Your sentence backwards is : \n");
+    
+    /* print words backwards */
+    for (i = numWords; i >= 0; i--) {
+      printf("%s ", words[i]);
+    }
+    printf("%c%c\n",'\b' ,terminatingChar);
   } else {
     printf("Please make sure you end your sentence with either a !, ?, or .\n");
   }
-
-  /* print words backwards */
-  for (i = 0; i < numWords; i++) {
-    printf("%s\n", words[i]);
-  }
-
-  
+ 
 }
 
