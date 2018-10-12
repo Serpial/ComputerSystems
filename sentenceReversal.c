@@ -1,3 +1,13 @@
+/*
+ * Title       : Volume and Area
+ * Author      : Paul Hutchison, 201741535
+ * Description : This program covers questions 1 to 5
+ *               This program takes the radius of a sphere from the user
+ *               and, based on the user's input, outputs the volume,
+ *               surface area, or both.
+ */
+
+
 #include <stdio.h>
 #include <string.h>
 #define CHAR_SENTENCE_SIZE 250 /* maxumum number of characters a sentence can be */
