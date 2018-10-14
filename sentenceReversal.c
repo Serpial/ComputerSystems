@@ -17,7 +17,22 @@
 /* Function Prototypes */
 int findIndexOfBreak (char sentence[CHAR_SENTENCE_SIZE]);
 
-void getWordArray (char sentence[CHAR_SENTENCE_SIZE], int spaceOfBreak, int *numWords,)
+void getWordArray (char sentence[CHAR_SENTENCE_SIZE], *words[CHAR_NUM_WORDS] int spaceOfBreak, int *numWords) {
+  /* form a collection of words from the sentence */
+  for (i = 0; i < spaceOfBreak; i++) {
+    if (sentence[i] == ' ') {
+      words[numWords++][goodChar] = '\0';
+      /* On to the next word */
+      if (sentence[i+1] != ' ' && spaceOfBreak != i+1) {
+        words[numWords][0] = sentence[++i];
+        goodChar = 1;
+      }
+    } else {
+      words[numWords][goodChar++] = sentence[i];
+    }
+  }
+  words[numWords][goodChar] = '\0';
+}
 
 int main(void) {
   char sentence[CHAR_SENTENCE_SIZE];
@@ -36,21 +51,6 @@ int main(void) {
   }
   
   terminatingChar = sentence[spaceOfBreak];
-
-  /* form a collection of words from the sentence */
-  for (i = 0; i < spaceOfBreak; i++) {
-    if (sentence[i] == ' ') {
-      words[numWords++][goodChar] = '\0';
-      /* On to the next word */
-      if (sentence[i+1] != ' ' && spaceOfBreak != i+1) {
-        words[numWords][0] = sentence[++i];
-        goodChar = 1;
-      }
-    } else {
-      words[numWords][goodChar++] = sentence[i];
-    }
-  }
-  words[numWords][goodChar] = '\0';
 
   printf("Your sentence backwards is : ");
   
