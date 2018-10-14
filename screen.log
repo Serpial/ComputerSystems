@@ -1,0 +1,163 @@
+Script started on 2018-10-14 20:48:49+0100
+tmb17162@ssh:~/Documents/ComputerSystems$ whoami
+tmb17162
+tmb17162@ssh:~/Documents/ComputerSystems$ history
+    1  whoami
+    2  history
+tmb17162@ssh:~/Documents/ComputerSystems$ gcc -std=c89 volumeAndArea.c 
+tmb17162@ssh:~/Documents/ComputerSystems$ ./a.out 
+What is the radius of your circle : 6
+Menu
+----
+s : Surface Area
+v : Volume
+b : Both
+Please enter an initial : s
+s taken as input
+The surface area of your sphere is 75.40
+tmb17162@ssh:~/Documents/ComputerSystems$ ./a.out 
+What is the radius of your circle : 7
+Menu
+----
+s : Surface Area
+v : Volume
+b : Both
+Please enter an initial : v
+v taken as input
+The volume of your sphere is 234.57
+tmb17162@ssh:~/Documents/ComputerSystems$ ./a.out 
+What is the radius of your circle : -6
+You can't get a negative circle
+Please try again : 5
+Menu
+----
+s : Surface Area
+v : Volume
+b : Both
+Please enter an initial : b
+b taken as input
+For your sphere:
+the area is 62.83
+the volume is 167.55
+tmb17162@ssh:~/Documents/ComputerSystems$ gcc -std=c89 
+a.out               ArrayOfInt.c        .git/               .gitattributes      .gitignore          quizGrader.c        screen.log          sentenceReversal.c  volumeAndArea.c
+tmb17162@ssh:~/Documents/ComputerSystems$ gcc -std=c89 ArrayOfInt.c 
+tmb17162@ssh:~/Documents/ComputerSystems$ a.out 
+Please enter the values of row 0 (seperate with spaces) : 3 3 3 3 3
+Please enter the values of row 1 (seperate with spaces) : 3 2 2 2 2 3
+Please enter the values of row 2 (seperate with spaces) : 3 2 1 2 3
+Please enter the values of row 3 (seperate with spaces) : 3 2 2 2 3
+Please enter the values of row 4 (seperate with spaces) : 3 3 3 3 3
+		-----------------------------------------	 Sum of Horizontals:
+		|3	3	3	3	3	|	15
+		|3	2	2	2	3	|	12
+		|3	2	1	2	3	|	11
+		|3	2	2	2	3	|	12
+		|3	3	3	3	3	|	15
+		-----------------------------------------
+Sum of Verticle:15	12	11	12	15	
+tmb17162@ssh:~/Documents/ComputerSystems$ gcc -std=c89 quizGrader.c 
+tmb17162@ssh:~/Documents/ComputerSystems$ ./a.out 
+Please enter Student 1's score for quiz 1 : 1
+Please enter Student 1's score for quiz 2 : 2
+Please enter Student 1's score for quiz 3 : 3
+Please enter Student 1's score for quiz 4 : 4
+Please enter Student 1's score for quiz 5 : 5
+Please enter Student 2's score for quiz 1 : 6
+Please enter Student 2's score for quiz 2 : 7
+Please enter Student 2's score for quiz 3 : 8
+Please enter Student 2's score for quiz 4 : 9
+Please enter Student 2's score for quiz 5 : 10
+Please enter Student 3's score for quiz 1 : 11
+Please enter Student 3's score for quiz 2 : 12
+Please enter Student 3's score for quiz 3 : 13
+Please enter Student 3's score for quiz 4 : 14
+Please enter Student 3's score for quiz 5 : 15
+Please enter Student 4's score for quiz 1 : 16
+Please enter Student 4's score for quiz 2 : 17
+Please enter Student 4's score for quiz 3 : 18
+Please enter Student 4's score for quiz 4 : 19
+Please enter Student 4's score for quiz 5 : 20
+Please enter Student 5's score for quiz 1 : 21
+Please enter Student 5's score for quiz 2 : 22
+Please enter Student 5's score for quiz 3 : 23
+Please enter Student 5's score for quiz 4 : 24
+Please enter Student 5's score for quiz 5 : 25
+Please enter Student 6's score for quiz 1 : 26
+Please enter Student 6's score for quiz 2 : 27
+Please enter Student 6's score for quiz 3 : 28
+Please enter Student 6's score for quiz 4 : 29
+Please enter Student 6's score for quiz 5 : 30
+Please enter Student 7's score for quiz 1 : 31
+Please enter Student 7's score for quiz 2 : 32
+Please enter Student 7's score for quiz 3 : 33
+Please enter Student 7's score for quiz 4 : 34
+Please enter Student 7's score for quiz 5 : 35
+Please enter Student 8's score for quiz 1 : 36
+Please enter Student 8's score for quiz 2 : 37
+Please enter Student 8's score for quiz 3 : 38
+Please enter Student 8's score for quiz 4 : 39
+Please enter Student 8's score for quiz 5 : 40
+Please enter Student 9's score for quiz 1 : 41
+Please enter Student 9's score for quiz 2 : 42
+Please enter Student 9's score for quiz 3 : 43
+Please enter Student 9's score for quiz 4 : 44
+Please enter Student 9's score for quiz 5 : 45
+Please enter Student 10's score for quiz 1 : 46
+Please enter Student 10's score for quiz 2 : 47
+Please enter Student 10's score for quiz 3 : 48
+Please enter Student 10's score for quiz 4 : 49
+Please enter Student 10's score for quiz 5 : 50
+
+
+
+Student	Total Score	Average
+---------------------------------
+1	15		03
+2	40		08
+3	65		13
+4	90		18
+5	115		23
+6	140		28
+7	165		33
+8	190		38
+9	215		43
+10	240		48
+---------------------------------
+For each quiz:
+Quiz	Average Score	High Score	Low Score
+---------------------------------
+1	23.50		46		1
+2	24.50		47		2
+3	25.50		48		3
+4	26.50		49		4
+5	27.50		50		5
+---------------------------------
+tmb17162@ssh:~/Documents/ComputerSystems$ ./a.out [18@gcc -std=c89 quizGrader.c[C[K[K[K[K[K[K[K[K[K[K[K[K[K
+a.out               ArrayOfInt.c        .git/               .gitattributes      .gitignore          quizGrader.c        screen.log          sentenceReversal.c  volumeAndArea.c
+tmb17162@ssh:~/Documents/ComputerSystems$ gcc -std=c89 sentenceReversal.c 
+tmb17162@ssh:~/Documents/ComputerSystems$ ./a.out 
+Please enter a sentence that ends in a period, question mark, or exclamation point
+Enter sentence here : this a   is a sentence with some words.
+Your sentence backwards is : words some with sentence a is this .
+tmb17162@ssh:~/Documents/ComputerSystems$ whoami
+tmb17162
+tmb17162@ssh:~/Documents/ComputerSystems$ history
+    1  whoami
+    2  history
+    3  gcc -std=c89 volumeAndArea.c 
+    4  ./a.out 
+    5  ./a.out 
+    6  ./a.out 
+    7  gcc -std=c89 ArrayOfInt.c 
+    8  a.out 
+    9  gcc -std=c89 quizGrader.c 
+   10  ./a.out 
+   11  gcc -std=c89 sentenceReversal.c 
+   12  ./a.out 
+   13  whoami
+   14  history
+tmb17162@ssh:~/Documents/ComputerSystems$ exit
+exit
+
+Script done on 2018-10-14 20:52:48+0100
