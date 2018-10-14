@@ -19,7 +19,7 @@ void displayArrayAndSum(int theBigArray[ARRAY_SIZE][ARRAY_SIZE]);
 int main(void) {
   /* Local Variables */
   int i;
-  /* the array below holds the 5x5 matrix
+  /* the array below holds the 5x5 matrix */
   int theBigArray [ARRAY_SIZE][ARRAY_SIZE];
 
 
