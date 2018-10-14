@@ -42,7 +42,7 @@ int main(void) {
 void displayArrayAndSum(int theBigArray[ARRAY_SIZE][ARRAY_SIZE]) {
   /* Local Variables */
   int i, j, sumHorzVals = 0, sumVertVals[ARRAY_SIZE];
-  char *linebreak = "-----------------------------------------\n";
+  char *linebreak = "-----------------------------------------";
   
 /* init the sumVertlines with it's starting value: 0 */
   for (i = 0; i < ARRAY_SIZE; i++) {
@@ -51,7 +51,7 @@ void displayArrayAndSum(int theBigArray[ARRAY_SIZE][ARRAY_SIZE]) {
 
 
   /* Print Values and Horizontal totals */
-  printf("%s|",linebreak);
+  printf("\t\t%s\t Sum of Horizontals:\n\t\t|",linebreak);
   for (i = 0; i < ARRAY_SIZE; i++) {
     for (j = 0; j < ARRAY_SIZE; j++){
       printf("%d\t", theBigArray[i][j]);
@@ -61,7 +61,7 @@ void displayArrayAndSum(int theBigArray[ARRAY_SIZE][ARRAY_SIZE]) {
     }
     printf("|\t%d\n", sumHorzVals);
     if (!(i == ARRAY_SIZE-1)) {
-      printf("|");
+      printf("\t\t|");
     }
     sumHorzVals = 0;
 
@@ -69,7 +69,7 @@ void displayArrayAndSum(int theBigArray[ARRAY_SIZE][ARRAY_SIZE]) {
   
 
   /* Print Vertical Totals */
-  printf("%s",linebreak);
+  printf("\t\t%s\nSum of Verticle:",linebreak);
   for (i = 0; i < ARRAY_SIZE; i++) {
     printf("%d\t",sumVertVals[i]);
   }
