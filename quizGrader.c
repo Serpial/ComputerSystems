@@ -28,21 +28,14 @@ struct Student {
 int findHigh(int quizScores[NUMBER_QUIZ]);
 int findLow(int quizScores[NUMBER_QUIZ]);
 void scanForQuizScores(struct Student *student, int studentIndex);
-void printStatistics (struct Student students [NUMBER_STUDENTS], float quizAvg[NUMBER_QUIZ]);
+void printStatistics (struct Student students [NUMBER_STUDENTS]);
+int getTotalScoresForAQuiz (struct Student student [NUMBER_STUDENTS], int quizNum);
 
 /* Definition of main */
 int main(void) {
   int i, j; /* Index */
   /* structure holding the students individual data */
   struct Student students [NUMBER_STUDENTS];
-  float quizAvg[NUMBER_QUIZ];
-  int quizTotals[NUMBER_STUDENTS];
-  
-  
-  /* Initialize quiz totals used to calculate average*/
-  for (i = 0; i < NUMBER_QUIZ; i++) {
-    quizTotals[i] = 0;
-  }
 
   /* Get the scores from the user and calculate relevant statistics*/
   for (i = 0; i < NUMBER_STUDENTS; i++) {
@@ -51,14 +44,13 @@ int main(void) {
     students[i].totalScore = 0;
     for (j = 0; j < NUMBER_QUIZ; j++) {
       students[i].totalScore += students[i].quizScores[j];
-      quizTotals[j] += students[i].quizScores[j];
     }
     students[i].avgScore = students[i].totalScore/NUMBER_QUIZ;
-    quizAvg[i] = quizTotals[i]/NUMBER_STUDENTS;
   }
+
   
   /* Then print the value */
- printStatistics(students, quizAvg);
+  printStatistics(students);
  
  return 0;
 }
@@ -67,7 +59,7 @@ int main(void) {
 /* printStatistics
  * This function prints of all of the data collected
  */
-void printStatistics (struct Student students[NUMBER_STUDENTS], float quizAvg[NUMBER_QUIZ]) {
+void printStatistics (struct Student students[NUMBER_STUDENTS]) {
   int listOfScoresForTest[NUMBER_STUDENTS];
   int i, j;
   
@@ -89,7 +81,7 @@ void printStatistics (struct Student students[NUMBER_STUDENTS], float quizAvg[NU
     for (j = 0; j < NUMBER_STUDENTS; j++) {
       listOfScoresForTest[j] = students[j].quizScores[i]; 
     }
-    printf("%d\t%.2f\t\t", i+1, quizAvg[i]);
+    printf("%d\t%d\t\t", i+1, getTotalScoresForAQuiz(students, i));
     printf("%d\t\t", findHigh(listOfScoresForTest));
     printf("%d\n", findLow(listOfScoresForTest));
   }
@@ -119,7 +111,7 @@ void scanForQuizScores(struct Student *student, int studentIndex) {
  * finds the highest value out of a given 
  * list of test scores
  */
-int findHigh(int quizScores[NUMBER_STUDENTS]) {
+int findHigh(int quizScores[NUMBER_QUIZ]) {
   int i, highestScore = quizScores[0];
   for (i = 1; i < NUMBER_QUIZ; i++) {
     if (quizScores[i] > highestScore) {
@@ -134,7 +126,7 @@ int findHigh(int quizScores[NUMBER_STUDENTS]) {
  * finds the lowest value out of a given 
  * list of test scores
  */
-int findLow(int quizScores[NUMBER_STUDENTS]) {
+int findLow(int quizScores[NUMBER_QUIZ]) {
   int i, lowestScore = quizScores[0];
   for (i = 0; i < NUMBER_QUIZ; i++) {
     if (quizScores[i] < lowestScore) {
@@ -142,4 +134,17 @@ int findLow(int quizScores[NUMBER_STUDENTS]) {
     }
   }
   return lowestScore;
+}
+
+/* getTotalScoresForAQuiz
+ * returns the total for one particular quiz
+ */
+int getTotalScoresForAQuiz (struct Student student [NUMBER_STUDENTS], int quizNum) {
+  int i; /* Index */
+  int total = 0;
+  
+  for (i = 0; i < NUMBER_STUDENTS; i++){
+    total += student->quizScores[quizNum];
+  }
+  return total;
 }

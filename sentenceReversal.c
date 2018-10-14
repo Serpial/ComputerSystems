@@ -39,7 +39,7 @@ int main(void) {
 
   /* words is also filled when this within this function as 
      the words are being found */
-  numWords = getNumWords(sentence, words, spaceOfBreak);
+  numWords = getNumWordsAndFillWords(sentence, words, spaceOfBreak);
   
   terminatingChar = sentence[spaceOfBreak];
   
