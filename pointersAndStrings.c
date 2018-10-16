@@ -4,12 +4,6 @@
 /* function prototypes */
 void quest4(int *a, int *p, int *q);
 void quest5(int *p);
-void quest6() {
-  int i = 16;
-  int *p = &i, *p = &i;
-
-  printf("p = i : ")
-}
 
 int main(void) {
   int a[] = {5,15,34,54,14,2,52,72};
