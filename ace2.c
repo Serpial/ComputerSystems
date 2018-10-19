@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <ctype.h>
 #include <string.h>
-#define MAX_NICKNAME_CHAR 7
+#define MAX_NICKNAME_CHAR 50
 #define MAX_INPUT_CHAR 2
 
 // Function Prototypes 
