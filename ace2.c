@@ -19,7 +19,6 @@
 
 #include <stdio.h>
 #include <ctype.h> // To capitalise a character
-#include <string.h> // Not sure if I actually use this
 #include <unistd.h> // Used for sleeping the program to emulate the computer thinking
 // Used in getting random int
 #include <time.h>
