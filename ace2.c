@@ -28,7 +28,7 @@
 #define MAX_INPUT_CHAR 50 // The maximum number of characters a nickname can be
 #define SQUARE_CAP 3 // The number of elements in a row or column in tic-tac-toe
 #define TRUE 1
-#define FALSE 2
+#define FALSE 0
 
 /*     Function Prototypes     */
 /*-----------------------------*/
@@ -57,9 +57,9 @@ int detect_win(char gameBoard[SQUARE_CAP][SQUARE_CAP]);
 char testSet(char testArray[SQUARE_CAP]);
 
 //     Question 7 Functions
-void findAndReplaceTempMove() {
-  
-}
+void findAndReplaceTempMove(char gameBoard[SQUARE_CAP][SQUARE_CAP], char piece);
+void runUserMove(char gameBoard[SQUARE_CAP][SQUARE_CAP], char *nickname, char piece);
+int isFull(char gameBoard[SQUARE_CAP][SQUARE_CAP]);
 
 ///////////////////////////////////////////////////////////////////
 // Question 7 Function 
@@ -72,6 +72,7 @@ int main(void) {
   
   int numberOfGames = 0;
   int player1wins = 0, player2wins= 0;
+  int isWinner = 0;
   srand(time(NULL)); // seed random
   
   
@@ -79,10 +80,73 @@ int main(void) {
     clear_board(gameBoard);
     getGameDetails(&gameType, &playerPiece1, &playerPiece2, nickname1, nickname2);
 
-    gameBoard[0][0] = 'X';
-    display_board(gameBoard);
+    for (;;){
+      numberOfGames++;
+      switch(gameType) {
+      case 1:
+        // Run player 1's move
+        runUserMove(gameBoard, nickname1, playerPiece1);
+        // Run Player 2's move
+        runUserMove(gameBoard, nickname2, playerPiece2);
+        break;
+      case 2:
+        // Run the user's move
+        runUserMove(gameBoard, nickname1, playerPiece1);
 
+        // Get the Computer's move
+        computer_move(gameBoard);
+        findAndReplaceTempMove(gameBoard, playerPiece2);
+        display_board(gameBoard);
+        break;
+      case 0: return 0;
+      }
+      isWinner = detect_win(gameBoard);
+      printf("Getting here\n");
+      if (isWinner == 1){
+        player1wins++;
+        break;
+      } else if (isWinner == 2) {
+        player2wins++;
+        break;
+      } else if (isWinner == 0 && isFull(gameBoard)) {
+        printf("Game is a draw\n");
+        printf("%s has won %d/%d games\n", nickname1, player1wins, numberOfGames);
+        printf("%s has won %d/%d gamse\n", nickname2, player2wins, numberOfGames);
+        break;
+      }
+    }
+
+    // game is over
   }
+}
+
+void findAndReplaceTempMove(char gameBoard[SQUARE_CAP][SQUARE_CAP], char piece) {
+  for (int i = 0; i < SQUARE_CAP; i++) {
+    for (int j = 0; j < SQUARE_CAP;j++) {
+      if (gameBoard[i][j] == 'T') {
+        gameBoard[i][j] = piece;
+      }
+    }
+  }
+}
+
+void runUserMove(char gameBoard[SQUARE_CAP][SQUARE_CAP], char *nickname, char piece) {
+  printf("%s, ", nickname);
+  user_move(gameBoard);
+  findAndReplaceTempMove(gameBoard, piece);
+  display_board(gameBoard);
+}
+
+int isFull(char gameBoard[SQUARE_CAP][SQUARE_CAP]) {
+  for (int i = 0; i < SQUARE_CAP; i++) {
+    for (int j = 0; j < SQUARE_CAP; j++) {
+      if (gameBoard[i][j] == 'n') {
+        return FALSE;
+      }
+    }
+  }
+
+  return TRUE;
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -114,6 +178,8 @@ void getGameDetails(int *gameType, char *playerPiece1, char *playerPiece2, char 
     break;
   case '2':
     // User wishes to play against the computer
+    getNickname(1, nickname1);
+    nickname2 = "computer";
     getValidPiece(playerPiece1, playerPiece2, nickname1, nickname2);
     *gameType = 2;
     break;
@@ -127,7 +193,7 @@ void getGameDetails(int *gameType, char *playerPiece1, char *playerPiece2, char 
 }
 
 void getNickname(int player, char *nickname) {
-  printf("For the player number %d, ", player);
+  printf("For player %d, ", player);
   prompt_user("please enter a nickname : ", nickname);
 }
 
@@ -169,8 +235,7 @@ void clear_board(char gameBoard[SQUARE_CAP][SQUARE_CAP]){
 ///////////////////////////////////////////////////////////////////
 
 void display_board(char gameBoard[SQUARE_CAP][SQUARE_CAP]) {
-  printf("Got to here?1");
-  printf("\n\t");
+  printf("\n\n\t");
   for (int i = 0; i < SQUARE_CAP; i++) {
     for (int j = 0; j < SQUARE_CAP; j++) {
       if (gameBoard[i][j] == 'X' || gameBoard[i][j] == 'O') {
@@ -190,7 +255,7 @@ void display_board(char gameBoard[SQUARE_CAP][SQUARE_CAP]) {
       printf("\n\t");
     }
   }
-  printf("\n");
+  printf("\n\n");
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -206,14 +271,14 @@ void user_move(char gameBoard[SQUARE_CAP][SQUARE_CAP]) {
 
     // For column
     getRowOrColumn(&column, FALSE);
-
+    
     // Do a search in the game board to see if that space is filled
     if (canPlacePiece(gameBoard, row, column)) {
       gameBoard[row][column] = 'T'; // T for temp
       return;
     } else {
       printf("That position appears to have something in it\n");
-      printf("Please find a new location\n\n");
+      printf("Please find a new location\n");
       display_board(gameBoard);
     }
   }
@@ -223,13 +288,13 @@ void getRowOrColumn(int *rowOrColumn, int isRow) {
   char tempString[MAX_INPUT_CHAR];
   
   for (;;) {
-    printf("What %s would you like? (", (isRow?"row":"column"));
-    for (int i = 0; i < SQUARE_CAP; i++) {
-      printf(" %d", i+1);
-      if (i < SQUARE_CAP-1) {
+    printf("what %s would you like? (", (isRow?"row":"column"));
+    for (int i = 0; i < SQUARE_CAP-1; i++) {
+      printf("%d", i+1);
+      if (i < SQUARE_CAP-2) {
         printf(", ");
       } else {
-        printf(" and ");
+        printf(", and %d", (i+1)+1);
       }
     }
     prompt_user(") : ", tempString);
@@ -240,12 +305,11 @@ void getRowOrColumn(int *rowOrColumn, int isRow) {
     default:  *rowOrColumn = -1;
     }
     printf("What you entered is not valid\n");
-    getRowOrColumn(rowOrColumn, isRow);
   }
 }
 
 int canPlacePiece (char gameBoard[SQUARE_CAP][SQUARE_CAP],int row,int column) {
-  return gameBoard[row][column] != 'n';
+  return gameBoard[row][column] == 'n';
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -266,12 +330,12 @@ void computer_move(char gameBoard[SQUARE_CAP][SQUARE_CAP]) {
       return;
     }
   }
-
+  printf("Got to here\n");
   // if we didn't get it in the three random guesses then enter manually
-  for (int i = SQUARE_CAP-1; i = 0; i--) {
-    for (int j = SQUARE_CAP-1; j = 0; j++) {
-      if (canPlacePiece(gameBoard,i,j)) {
-        gameBoard[i][j] = 'T';
+  for (row = SQUARE_CAP-1; row >= 0; row--) {
+    for (int column = SQUARE_CAP-1; column >= 0; column--) {
+      if (canPlacePiece(gameBoard,row,column)) {
+        gameBoard[row][column] = 'T';
         return;
       }
     }
@@ -307,15 +371,19 @@ int detect_win(char gameBoard[SQUARE_CAP][SQUARE_CAP]) {
   for (int i = 0; i < SQUARE_CAP; i++) {
     for (int j = 0; j < SQUARE_CAP; j++) {
       testArray[j] = gameBoard[i][j];
+
     }
+    //    printf("%c %c %c\n", testArray[0], testArray[1], testArray[2]);
     testChar = testSet(testArray);
+    //    printf("Test Char : %c\n", testChar);
     if (testChar != 'n') {
       break;
     }
   }
 
+
   // Vertical
-  if (testChar != 'n') {
+  if (testChar == 'n') {
     for (int i = 0; i < SQUARE_CAP; i++) {
       for (int j = 0; j < SQUARE_CAP; j++) {
         testArray[j] = gameBoard[j][i];
@@ -328,27 +396,33 @@ int detect_win(char gameBoard[SQUARE_CAP][SQUARE_CAP]) {
   }
 
   // Diagonals
-  if (testChar != 'n') {
+  if (testChar == 'n') {
     // top left to bottom right
     for (int i = 0; i < SQUARE_CAP; i++) {
       testArray[i] = gameBoard[i][i];
     }
     testChar = testSet(testArray);
   }
-  if (testChar != 'n') {
+  if (testChar == 'n') {
     // top right to bottom left
     for (int i = SQUARE_CAP; i > 0; i--) {
       testArray[i] = gameBoard[i][SQUARE_CAP-i];
     }
     testChar = testSet(testArray);
   }
-  
+
   switch(testChar) {
   case 'X':
+    printf("here'X'\n");
     return 1;
   case 'O':
+    printf("here'O'\n");
+    return 2;
+  case 'n':
+    printf("here'n'\n");
     return 0;
   default:
-    return -1;
+    printf("here%c\n", testChar);
+    return 0;
   }
 }
