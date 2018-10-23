@@ -19,6 +19,7 @@
 
 #include <stdio.h>
 #include <ctype.h> // To capitalise a character
+#include <string.h>
 #include <unistd.h> // Used for sleeping the program to emulate the computer thinking
 // Used in getting random int
 #include <time.h>
@@ -34,9 +35,9 @@
 /*-----------------------------*/
 //     Question 1 Functions
 void prompt_user(char *message, char *answer);
-void getValidPiece(char *playerPiece1, char *playerPiece2, char *nickname1, char *nickname2);
+void getValidPiece(char *playerPiece1, char *playerPiece2, char nickname[2][MAX_INPUT_CHAR]);
 void getNickname(int player, char *nickname);
-void getGameDetails(int *gameType, char *playerPiece1, char *playerPiece2, char *nickname1, char *nickname2);
+void getGameDetails(int *gameType, char *playerPiece1, char *playerPiece2, char nickname[2][MAX_INPUT_CHAR]);
 
 //     Question 2 Function
 void clear_board(char gameBoard[SQUARE_CAP][SQUARE_CAP]);
@@ -53,45 +54,65 @@ int canPlacePiece (char gameBoard[SQUARE_CAP][SQUARE_CAP],int row,int column);
 void computer_move(char gameBoard[SQUARE_CAP][SQUARE_CAP]);
 
 //     Question 6 Functions
-int detect_win(char gameBoard[SQUARE_CAP][SQUARE_CAP]);
 char testSet(char testArray[SQUARE_CAP]);
+int detect_win(char gameBoard[SQUARE_CAP][SQUARE_CAP]);
 
 //     Question 7 Functions
 void findAndReplaceTempMove(char gameBoard[SQUARE_CAP][SQUARE_CAP], char piece);
 void runUserMove(char gameBoard[SQUARE_CAP][SQUARE_CAP], char *nickname, char piece);
 int isFull(char gameBoard[SQUARE_CAP][SQUARE_CAP]);
-
+void printScores(int numberOfGames, int playerWins[2], char nickname[2][MAX_INPUT_CHAR]);
+void actionWin(char gameBoard[SQUARE_CAP][SQUARE_CAP], int *numberOfGames, int playerWins[2]){
+  int isWinner = detect_win(gameBoard);
+  printf("Getting here\n");
+  if (isWinner == 1){
+    playerWins[0]++;
+    printScores(*numberOfGames, playerWins, nickname);
+    break;
+  } else if (isWinner == 2) {
+    playerWins[1]++;
+    printScores(*numberOfGames, playerWins, nickname);
+    break;
+  } else if (isWinner == -1 && isFull(gameBoard)) {
+    printf("Game is a draw\n");
+    printScores(*numberOfGames, playerWins, nickname);
+    break;
+  }
+}
 ///////////////////////////////////////////////////////////////////
 // Question 7 Function 
 ///////////////////////////////////////////////////////////////////
 int main(void) {
   int gameType;
   char playerPiece1, playerPiece2;
-  char nickname1[MAX_INPUT_CHAR],nickname2[MAX_INPUT_CHAR];
+  char nickname[2][MAX_INPUT_CHAR];
+  //  char nickname1[MAX_INPUT_CHAR],nickname2[MAX_INPUT_CHAR];
   char gameBoard[SQUARE_CAP][SQUARE_CAP];
   
   int numberOfGames = 0;
-  int player1wins = 0, player2wins= 0;
+  int playerWins[2];
   int isWinner = 0;
+  playerWins[0] = 0;
+  playerWins[1] = 0;
   srand(time(NULL)); // seed random
-  
+
+  getGameDetails(&gameType, &playerPiece1, &playerPiece2, nickname);
   
   for (;;) {
     clear_board(gameBoard);
-    getGameDetails(&gameType, &playerPiece1, &playerPiece2, nickname1, nickname2);
-
+    
     for (;;){
       numberOfGames++;
       switch(gameType) {
       case 1:
         // Run player 1's move
-        runUserMove(gameBoard, nickname1, playerPiece1);
+        runUserMove(gameBoard, nickname[0], playerPiece1);
         // Run Player 2's move
-        runUserMove(gameBoard, nickname2, playerPiece2);
+        runUserMove(gameBoard, nickname[1], playerPiece2);
         break;
       case 2:
         // Run the user's move
-        runUserMove(gameBoard, nickname1, playerPiece1);
+        runUserMove(gameBoard, nickname[0], playerPiece1);
 
         // Get the Computer's move
         computer_move(gameBoard);
@@ -100,20 +121,8 @@ int main(void) {
         break;
       case 0: return 0;
       }
-      isWinner = detect_win(gameBoard);
-      printf("Getting here\n");
-      if (isWinner == 1){
-        player1wins++;
-        break;
-      } else if (isWinner == 2) {
-        player2wins++;
-        break;
-      } else if (isWinner == 0 && isFull(gameBoard)) {
-        printf("Game is a draw\n");
-        printf("%s has won %d/%d games\n", nickname1, player1wins, numberOfGames);
-        printf("%s has won %d/%d gamse\n", nickname2, player2wins, numberOfGames);
-        break;
-      }
+      
+      //asdf
     }
 
     // game is over
@@ -149,6 +158,11 @@ int isFull(char gameBoard[SQUARE_CAP][SQUARE_CAP]) {
   return TRUE;
 }
 
+void printScores(int numberOfGames, int playerWins[2], char nickname[2][MAX_INPUT_CHAR]) {
+  printf("%s has won %d/%d games\n", nickname[0], playerWins[0], numberOfGames);
+  printf("%s has won %d/%d gamse\n", nickname[1], playerWins[1], numberOfGames);
+}
+
 ///////////////////////////////////////////////////////////////////
 // Question 1 Functions
 ///////////////////////////////////////////////////////////////////
@@ -159,7 +173,7 @@ void prompt_user(char *message, char *answer) {
   scanf(" %s", answer);
 }
 
-void getGameDetails(int *gameType, char *playerPiece1, char *playerPiece2, char *nickname1, char *nickname2) {
+void getGameDetails(int *gameType, char *playerPiece1, char *playerPiece2, char nickname[2][MAX_INPUT_CHAR]) {
   char menuInput[MAX_INPUT_CHAR];
 
   // Question 1 part i
@@ -169,18 +183,18 @@ void getGameDetails(int *gameType, char *playerPiece1, char *playerPiece2, char 
   switch (menuInput[0]) {
   case '1':
     // Question 1 part iii
-    getNickname(1, nickname1);
-    getNickname(2, nickname2);
+    getNickname(1, nickname[0]);
+    getNickname(2, nickname[1]);
     
     // Question 1 part ii
-    getValidPiece(playerPiece1, playerPiece2, nickname1, nickname2);
+    getValidPiece(playerPiece1, playerPiece2, nickname);
     *gameType = 1;
     break;
   case '2':
     // User wishes to play against the computer
-    getNickname(1, nickname1);
-    nickname2 = "computer";
-    getValidPiece(playerPiece1, playerPiece2, nickname1, nickname2);
+    getNickname(1, nickname[0]);
+    strcpy(nickname[1], "computer");
+    getValidPiece(playerPiece1, playerPiece2, nickname);
     *gameType = 2;
     break;
   case '0':
@@ -188,7 +202,7 @@ void getGameDetails(int *gameType, char *playerPiece1, char *playerPiece2, char 
     return;
   default:
     printf("What you entered was invalid\n");
-    getGameDetails(gameType, playerPiece1, playerPiece2, nickname1, nickname2);
+    getGameDetails(gameType, playerPiece1, playerPiece2, nickname);
   }
 }
 
@@ -197,9 +211,9 @@ void getNickname(int player, char *nickname) {
   prompt_user("please enter a nickname : ", nickname);
 }
 
-void getValidPiece(char *playerPiece1, char *playerPiece2, char *nickname1, char *nickname2) {
+void getValidPiece(char *playerPiece1, char *playerPiece2, char nickname[2][MAX_INPUT_CHAR]) {
   char tempString[MAX_INPUT_CHAR];
-  printf("What would %s like to play as X or 0?\n", nickname1);
+  printf("What would %s like to play as X or 0?\n", nickname[0]);
   for (;;) {
     prompt_user("Please enter X or O : ", tempString);
     tempString[0] = toupper(tempString[0]);
@@ -215,7 +229,7 @@ void getValidPiece(char *playerPiece1, char *playerPiece2, char *nickname1, char
       printf("The input you entered was invalid\n");
     }
   }
-  printf("This means that %s is %c.\n", nickname2, *playerPiece2);
+  printf("This means that %s is %c.\n", nickname[1], *playerPiece2);
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -420,7 +434,7 @@ int detect_win(char gameBoard[SQUARE_CAP][SQUARE_CAP]) {
     return 2;
   case 'n':
     printf("here'n'\n");
-    return 0;
+    return -1;
   default:
     printf("here%c\n", testChar);
     return 0;
