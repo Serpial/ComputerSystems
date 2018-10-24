@@ -61,72 +61,84 @@ int detect_win(char gameBoard[SQUARE_CAP][SQUARE_CAP]);
 void findAndReplaceTempMove(char gameBoard[SQUARE_CAP][SQUARE_CAP], char piece);
 void runUserMove(char gameBoard[SQUARE_CAP][SQUARE_CAP], char *nickname, char piece);
 int isFull(char gameBoard[SQUARE_CAP][SQUARE_CAP]);
+int actionWin(char gameBoard[SQUARE_CAP][SQUARE_CAP], int *numberOfGames, int playerWins[2], char nickname[2][MAX_INPUT_CHAR]);
 void printScores(int numberOfGames, int playerWins[2], char nickname[2][MAX_INPUT_CHAR]);
-void actionWin(char gameBoard[SQUARE_CAP][SQUARE_CAP], int *numberOfGames, int playerWins[2]){
-  int isWinner = detect_win(gameBoard);
-  printf("Getting here\n");
-  if (isWinner == 1){
-    playerWins[0]++;
-    printScores(*numberOfGames, playerWins, nickname);
-    break;
-  } else if (isWinner == 2) {
-    playerWins[1]++;
-    printScores(*numberOfGames, playerWins, nickname);
-    break;
-  } else if (isWinner == -1 && isFull(gameBoard)) {
-    printf("Game is a draw\n");
-    printScores(*numberOfGames, playerWins, nickname);
-    break;
-  }
-}
+
 ///////////////////////////////////////////////////////////////////
 // Question 7 Function 
 ///////////////////////////////////////////////////////////////////
+
 int main(void) {
   int gameType;
   char playerPiece1, playerPiece2;
   char nickname[2][MAX_INPUT_CHAR];
-  //  char nickname1[MAX_INPUT_CHAR],nickname2[MAX_INPUT_CHAR];
   char gameBoard[SQUARE_CAP][SQUARE_CAP];
   
   int numberOfGames = 0;
   int playerWins[2];
-  int isWinner = 0;
-  playerWins[0] = 0;
-  playerWins[1] = 0;
-  srand(time(NULL)); // seed random
+  int newGame = TRUE; // Boolean
+  char replayGame[MAX_INPUT_CHAR];
 
   getGameDetails(&gameType, &playerPiece1, &playerPiece2, nickname);
-  
+  playerWins[0] = 0;
+  playerWins[1] = 0;
+  srand(time(NULL));
+
+  // New Game
   for (;;) {
     clear_board(gameBoard);
-    
+    numberOfGames++;
+
+    // New turn
     for (;;){
-      numberOfGames++;
-      switch(gameType) {
-      case 1:
+      if (gameType == 1){
         // Run player 1's move
         runUserMove(gameBoard, nickname[0], playerPiece1);
+        if (actionWin(gameBoard,&numberOfGames,playerWins,nickname)) {
+          break;
+        }
         // Run Player 2's move
         runUserMove(gameBoard, nickname[1], playerPiece2);
-        break;
-      case 2:
+        if (actionWin(gameBoard,&numberOfGames,playerWins,nickname)) {
+          break;
+        }
+      } else if (gameType == 2) {
         // Run the user's move
         runUserMove(gameBoard, nickname[0], playerPiece1);
-
+        if (actionWin(gameBoard,&numberOfGames,playerWins,nickname)) {
+          break;
+        }
         // Get the Computer's move
         computer_move(gameBoard);
         findAndReplaceTempMove(gameBoard, playerPiece2);
         display_board(gameBoard);
-        break;
-      case 0: return 0;
+        if (actionWin(gameBoard,&numberOfGames,playerWins,nickname)) {
+          break;
+        }
+      } else if (gameType == 0) {
+        return 0;
       }
       
-      //asdf
-    }
+    } // end turn
 
-    // game is over
-  }
+    for (;;) {
+      prompt_user("Would you like another game? (y/n) : ", replayGame);
+      printf("%c\n", replayGame[0]);
+      if (replayGame[0] == 'y') {
+        newGame = TRUE;
+        break;
+      } else if (replayGame[0] == 'n') {
+        gameType = 0;
+        newGame = FALSE;
+        break;
+      } else {
+        printf("Invalid input\n");
+      }
+    }
+    if (!newGame) {
+      break;
+    }
+  }// end game
 }
 
 void findAndReplaceTempMove(char gameBoard[SQUARE_CAP][SQUARE_CAP], char piece) {
@@ -158,9 +170,21 @@ int isFull(char gameBoard[SQUARE_CAP][SQUARE_CAP]) {
   return TRUE;
 }
 
+int actionWin(char gameBoard[SQUARE_CAP][SQUARE_CAP], int *numberOfGames, int playerWins[2], char nickname[2][MAX_INPUT_CHAR]){
+  int winner = detect_win(gameBoard);
+  if (winner == 1){
+    playerWins[0]++;
+    printScores(*numberOfGames, playerWins, nickname);
+  } else if (winner == 2) {
+    playerWins[1]++;
+    printScores(*numberOfGames, playerWins, nickname);
+  }
+  return winner == 1 || winner == 2;
+}
+
 void printScores(int numberOfGames, int playerWins[2], char nickname[2][MAX_INPUT_CHAR]) {
   printf("%s has won %d/%d games\n", nickname[0], playerWins[0], numberOfGames);
-  printf("%s has won %d/%d gamse\n", nickname[1], playerWins[1], numberOfGames);
+  printf("%s has won %d/%d games\n", nickname[1], playerWins[1], numberOfGames);
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -380,63 +404,17 @@ char testSet(char testArray[SQUARE_CAP]) {
 }
 
 int detect_win(char gameBoard[SQUARE_CAP][SQUARE_CAP]) {
-  char testArray[SQUARE_CAP], testChar = 'n';
-  // Horizontals
-  for (int i = 0; i < SQUARE_CAP; i++) {
-    for (int j = 0; j < SQUARE_CAP; j++) {
-      testArray[j] = gameBoard[i][j];
+  char testArray[SQUARE_CAP] = {'O','X','O'};
+  char testChar = 'n';
 
-    }
-    //    printf("%c %c %c\n", testArray[0], testArray[1], testArray[2]);
-    testChar = testSet(testArray);
-    //    printf("Test Char : %c\n", testChar);
-    if (testChar != 'n') {
-      break;
-    }
-  }
-
-
-  // Vertical
-  if (testChar == 'n') {
-    for (int i = 0; i < SQUARE_CAP; i++) {
-      for (int j = 0; j < SQUARE_CAP; j++) {
-        testArray[j] = gameBoard[j][i];
-      }
-      testChar = testSet(testArray);
-      if (testChar != 'n') {
-        break;
-      }
-    } 
-  }
-
-  // Diagonals
-  if (testChar == 'n') {
-    // top left to bottom right
-    for (int i = 0; i < SQUARE_CAP; i++) {
-      testArray[i] = gameBoard[i][i];
-    }
-    testChar = testSet(testArray);
-  }
-  if (testChar == 'n') {
-    // top right to bottom left
-    for (int i = SQUARE_CAP; i > 0; i--) {
-      testArray[i] = gameBoard[i][SQUARE_CAP-i];
-    }
-    testChar = testSet(testArray);
-  }
-
+  testChar = testSet(testArray);
+  
   switch(testChar) {
   case 'X':
-    printf("here'X'\n");
     return 1;
   case 'O':
-    printf("here'O'\n");
     return 2;
   case 'n':
-    printf("here'n'\n");
-    return -1;
-  default:
-    printf("here%c\n", testChar);
     return 0;
   }
 }
