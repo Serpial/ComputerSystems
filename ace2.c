@@ -61,7 +61,7 @@ int detect_win(char gameBoard[SQUARE_CAP][SQUARE_CAP]);
 void findAndReplaceTempMove(char gameBoard[SQUARE_CAP][SQUARE_CAP], char piece);
 void runUserMove(char gameBoard[SQUARE_CAP][SQUARE_CAP], char *nickname, char piece);
 int isFull(char gameBoard[SQUARE_CAP][SQUARE_CAP]);
-int actionWin(char gameBoard[SQUARE_CAP][SQUARE_CAP], int *numberOfGames, int playerWins[2], char nickname[2][MAX_INPUT_CHAR]);
+int actionWin(char gameBoard[SQUARE_CAP][SQUARE_CAP], int *numberOfGames, int playerWins[2], char nickname[2][MAX_INPUT_CHAR], char *playerPiece1);
 void printScores(int numberOfGames, int playerWins[2], char nickname[2][MAX_INPUT_CHAR]);
 
 ///////////////////////////////////////////////////////////////////
@@ -94,25 +94,33 @@ int main(void) {
       if (gameType == 1){
         // Run player 1's move
         runUserMove(gameBoard, nickname[0], playerPiece1);
-        if (actionWin(gameBoard,&numberOfGames,playerWins,nickname)) {
+        if (actionWin(gameBoard,&numberOfGames,playerWins,nickname,&playerPiece1)) {
+          break;
+        } else if (isFull(gameBoard)) {
+          printf("The game is a draw\n");
+          printScores(numberOfGames,playerWins,nickname);
           break;
         }
         // Run Player 2's move
         runUserMove(gameBoard, nickname[1], playerPiece2);
-        if (actionWin(gameBoard,&numberOfGames,playerWins,nickname)) {
+        if (actionWin(gameBoard,&numberOfGames,playerWins,nickname,&playerPiece1)) {
           break;
         }
       } else if (gameType == 2) {
         // Run the user's move
         runUserMove(gameBoard, nickname[0], playerPiece1);
-        if (actionWin(gameBoard,&numberOfGames,playerWins,nickname)) {
+        if (actionWin(gameBoard,&numberOfGames,playerWins,nickname,&playerPiece1)) {
+          break;
+        }else if (isFull(gameBoard)) {
+          printf("The game is a draw\n");
+          printScores(numberOfGames,playerWins,nickname);
           break;
         }
         // Get the Computer's move
         computer_move(gameBoard);
         findAndReplaceTempMove(gameBoard, playerPiece2);
         display_board(gameBoard);
-        if (actionWin(gameBoard,&numberOfGames,playerWins,nickname)) {
+        if (actionWin(gameBoard,&numberOfGames,playerWins,nickname,&playerPiece1)) {
           break;
         }
       } else if (gameType == 0) {
@@ -123,11 +131,10 @@ int main(void) {
 
     for (;;) {
       prompt_user("Would you like another game? (y/n) : ", replayGame);
-      printf("%c\n", replayGame[0]);
-      if (replayGame[0] == 'y') {
+      if (toupper(replayGame[0]) == 'Y') {
         newGame = TRUE;
         break;
-      } else if (replayGame[0] == 'n') {
+      } else if (toupper(replayGame[0]) == 'N') {
         gameType = 0;
         newGame = FALSE;
         break;
@@ -170,16 +177,20 @@ int isFull(char gameBoard[SQUARE_CAP][SQUARE_CAP]) {
   return TRUE;
 }
 
-int actionWin(char gameBoard[SQUARE_CAP][SQUARE_CAP], int *numberOfGames, int playerWins[2], char nickname[2][MAX_INPUT_CHAR]){
-  int winner = detect_win(gameBoard);
-  if (winner == 1){
+int actionWin(char gameBoard[SQUARE_CAP][SQUARE_CAP], int *numberOfGames, int playerWins[2], char nickname[2][MAX_INPUT_CHAR], char *playerPiece1){
+  int winnerPiece = detect_win(gameBoard);
+  int playerPiece1Int;
+
+  playerPiece1Int = (*playerPiece1 == 'X'? 1 : 2);
+
+  if (winnerPiece == playerPiece1Int){
     playerWins[0]++;
     printScores(*numberOfGames, playerWins, nickname);
-  } else if (winner == 2) {
+  } else if (winnerPiece != 0) {
     playerWins[1]++;
     printScores(*numberOfGames, playerWins, nickname);
   }
-  return winner == 1 || winner == 2;
+  return winnerPiece == 1 || winnerPiece == 2;
 }
 
 void printScores(int numberOfGames, int playerWins[2], char nickname[2][MAX_INPUT_CHAR]) {
@@ -368,7 +379,6 @@ void computer_move(char gameBoard[SQUARE_CAP][SQUARE_CAP]) {
       return;
     }
   }
-  printf("Got to here\n");
   // if we didn't get it in the three random guesses then enter manually
   for (row = SQUARE_CAP-1; row >= 0; row--) {
     for (int column = SQUARE_CAP-1; column >= 0; column--) {
@@ -404,11 +414,43 @@ char testSet(char testArray[SQUARE_CAP]) {
 }
 
 int detect_win(char gameBoard[SQUARE_CAP][SQUARE_CAP]) {
-  char testArray[SQUARE_CAP] = {'O','X','O'};
+  char testArray[SQUARE_CAP];
   char testChar = 'n';
 
-  testChar = testSet(testArray);
-  
+  // Horizontal
+  for (int i = 0; i < SQUARE_CAP; i++) {
+    for (int j = 0; j < SQUARE_CAP; j++) {
+      testArray[j] = gameBoard[i][j];
+    }
+    testChar = testSet(testArray);
+    if (testChar != 'n') {break;}
+  }
+
+  // Vertical
+  if (testChar == 'n') {
+    for (int i = 0; i < SQUARE_CAP; i++) {
+      for (int j = 0; j < SQUARE_CAP; j++) {
+        testArray[j] = gameBoard[j][i];
+      }
+      testChar = testSet(testArray);
+      if (testChar != 'n') {break;}
+    }
+  }
+
+  // Diagonal
+  if (testChar == 'n') {
+    for (int i = 0; i < SQUARE_CAP; i++) {
+      testArray[i] = gameBoard[i][i];
+    }
+    testChar = testSet(testArray);
+  }
+  if (testChar == 'n') {
+    for (int i = 0; i < SQUARE_CAP; i++) {
+      testArray[i] = gameBoard[i][SQUARE_CAP-i-1];
+    }
+    testChar = testSet(testArray);
+  }
+
   switch(testChar) {
   case 'X':
     return 1;
