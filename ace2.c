@@ -17,6 +17,7 @@
  *
  **************************************************************************/
 
+// Include directives
 #include <stdio.h>
 #include <ctype.h> // To capitalise a character
 #include <string.h>
@@ -25,7 +26,7 @@
 #include <time.h>
 #include <stdlib.h>
 
-
+// Define directives
 #define MAX_INPUT_CHAR 50 // The maximum number of characters a nickname can be
 #define SQUARE_CAP 3 // The number of elements in a row or column in tic-tac-toe
 #define TRUE 1
@@ -36,7 +37,6 @@
 //     Question 1 Functions
 void prompt_user(char *message, char *answer);
 void getValidPiece(char *playerPiece1, char *playerPiece2, char nickname[2][MAX_INPUT_CHAR]);
-void getNickname(int player, char *nickname);
 void getGameDetails(int *gameType, char *playerPiece1, char *playerPiece2, char nickname[2][MAX_INPUT_CHAR]);
 
 //     Question 2 Function
@@ -69,16 +69,19 @@ void printScores(int numberOfGames, int playerWins[2], char nickname[2][MAX_INPU
 ///////////////////////////////////////////////////////////////////
 
 int main(void) {
+  // These variables will be run throughout various functions of the program
   int gameType;
   char playerPiece1, playerPiece2;
   char nickname[2][MAX_INPUT_CHAR];
   char gameBoard[SQUARE_CAP][SQUARE_CAP];
-  
+
+  // These are local variables used exclusively for producing the game
   int numberOfGames = 0;
   int playerWins[2];
   int newGame = TRUE; // Boolean
   char replayGame[MAX_INPUT_CHAR];
 
+  // Things needing done before the game begins
   getGameDetails(&gameType, &playerPiece1, &playerPiece2, nickname);
   playerWins[0] = 0;
   playerWins[1] = 0;
@@ -148,6 +151,9 @@ int main(void) {
   }// end game
 }
 
+/* findAndReplaceTempMove
+ * Turns a temporary move into the user's player piece (X or O)
+ */
 void findAndReplaceTempMove(char gameBoard[SQUARE_CAP][SQUARE_CAP], char piece) {
   for (int i = 0; i < SQUARE_CAP; i++) {
     for (int j = 0; j < SQUARE_CAP;j++) {
@@ -158,6 +164,9 @@ void findAndReplaceTempMove(char gameBoard[SQUARE_CAP][SQUARE_CAP], char piece) 
   }
 }
 
+/* runUserMove
+ * runs the basic set of function used by the user each turn
+ */
 void runUserMove(char gameBoard[SQUARE_CAP][SQUARE_CAP], char *nickname, char piece) {
   printf("%s, ", nickname);
   user_move(gameBoard);
@@ -165,6 +174,11 @@ void runUserMove(char gameBoard[SQUARE_CAP][SQUARE_CAP], char *nickname, char pi
   display_board(gameBoard);
 }
 
+/* isFull
+ * checks if the gameboard is full and returns a boolean value
+ * of true if we do find that there are no empty elements
+ * Returns : boolean isFull
+ */
 int isFull(char gameBoard[SQUARE_CAP][SQUARE_CAP]) {
   for (int i = 0; i < SQUARE_CAP; i++) {
     for (int j = 0; j < SQUARE_CAP; j++) {
@@ -177,6 +191,11 @@ int isFull(char gameBoard[SQUARE_CAP][SQUARE_CAP]) {
   return TRUE;
 }
 
+/* actionWin
+ * this function adjusts the variables holding the win counter for
+ * each player. it does this by checking if there is a win and does
+ * actions based on this
+ */
 int actionWin(char gameBoard[SQUARE_CAP][SQUARE_CAP], int *numberOfGames, int playerWins[2], char nickname[2][MAX_INPUT_CHAR], char *playerPiece1){
   int winnerPiece = detect_win(gameBoard);
   int playerPiece1Int;
@@ -193,6 +212,9 @@ int actionWin(char gameBoard[SQUARE_CAP][SQUARE_CAP], int *numberOfGames, int pl
   return winnerPiece == 1 || winnerPiece == 2;
 }
 
+/* printScores
+ * Prints the scores of each player out of number of games
+ */
 void printScores(int numberOfGames, int playerWins[2], char nickname[2][MAX_INPUT_CHAR]) {
   printf("%s has won %d/%d games\n", nickname[0], playerWins[0], numberOfGames);
   printf("%s has won %d/%d games\n", nickname[1], playerWins[1], numberOfGames);
@@ -202,12 +224,20 @@ void printScores(int numberOfGames, int playerWins[2], char nickname[2][MAX_INPU
 // Question 1 Functions
 ///////////////////////////////////////////////////////////////////
 
+/* prompt_user
+ * prompts the user for a string answer given an question
+ */
 void prompt_user(char *message, char *answer) {
   // Print message and get user input
   printf("%s", message);
   scanf(" %s", answer);
 }
 
+/* getGameDetails
+ * gets the data from the user neccessary to play the game.
+ * This includes their nickname, the piece they wish to play as
+ * and whether or the game is PvP or PvE
+ */
 void getGameDetails(int *gameType, char *playerPiece1, char *playerPiece2, char nickname[2][MAX_INPUT_CHAR]) {
   char menuInput[MAX_INPUT_CHAR];
 
@@ -218,8 +248,10 @@ void getGameDetails(int *gameType, char *playerPiece1, char *playerPiece2, char 
   switch (menuInput[0]) {
   case '1':
     // Question 1 part iii
-    getNickname(1, nickname[0]);
-    getNickname(2, nickname[1]);
+    printf("For player 1, ");
+    prompt_user("please enter a nickname : ", nickname[0]);
+    printf("For player 2, ");
+    prompt_user("please enter a nickname : ", nickname[1]);
     
     // Question 1 part ii
     getValidPiece(playerPiece1, playerPiece2, nickname);
@@ -227,7 +259,8 @@ void getGameDetails(int *gameType, char *playerPiece1, char *playerPiece2, char 
     break;
   case '2':
     // User wishes to play against the computer
-    getNickname(1, nickname[0]);
+    printf("For player 1, ");
+    prompt_user("please enter a nickname : ", nickname[0]);
     strcpy(nickname[1], "computer");
     getValidPiece(playerPiece1, playerPiece2, nickname);
     *gameType = 2;
@@ -241,11 +274,10 @@ void getGameDetails(int *gameType, char *playerPiece1, char *playerPiece2, char 
   }
 }
 
-void getNickname(int player, char *nickname) {
-  printf("For player %d, ", player);
-  prompt_user("please enter a nickname : ", nickname);
-}
-
+/* getValidPiece
+ * get the piece that the user wishes to play as an set it.
+ * the user can either play as X or O
+ */
 void getValidPiece(char *playerPiece1, char *playerPiece2, char nickname[2][MAX_INPUT_CHAR]) {
   char tempString[MAX_INPUT_CHAR];
   printf("What would %s like to play as X or 0?\n", nickname[0]);
@@ -271,6 +303,10 @@ void getValidPiece(char *playerPiece1, char *playerPiece2, char nickname[2][MAX_
 // QUESTION 2 Function
 ///////////////////////////////////////////////////////////////////
 
+/* clear_board
+ * clear the board of all of the value and replace them with my
+ * null value 'n'
+ */
 void clear_board(char gameBoard[SQUARE_CAP][SQUARE_CAP]){
   for (int i = 0; i < SQUARE_CAP; i++) {
     for (int j = 0; j < SQUARE_CAP; j++) {
@@ -283,6 +319,10 @@ void clear_board(char gameBoard[SQUARE_CAP][SQUARE_CAP]){
 // QUESTION 3 Function
 ///////////////////////////////////////////////////////////////////
 
+/* display_board
+ * simply displays the current state of the board for the user to
+ * see
+ */
 void display_board(char gameBoard[SQUARE_CAP][SQUARE_CAP]) {
   printf("\n\n\t");
   for (int i = 0; i < SQUARE_CAP; i++) {
@@ -310,6 +350,12 @@ void display_board(char gameBoard[SQUARE_CAP][SQUARE_CAP]) {
 ///////////////////////////////////////////////////////////////////
 // QUESTION 4 Function
 ///////////////////////////////////////////////////////////////////
+
+/* user_move
+ * attempts to get a user move until there is a valid user move.
+ * Takes in put then checks to see if there is a space in the
+ * designated spot to place the user input in the gameboard.
+ */
 void user_move(char gameBoard[SQUARE_CAP][SQUARE_CAP]) {
   // So what we are going to do is enter a temp character in where the user wants to go
   int row, column;
@@ -333,6 +379,11 @@ void user_move(char gameBoard[SQUARE_CAP][SQUARE_CAP]) {
   }
 }
 
+/* getRowOrColumn
+ * using a boolean input to decide whether or not we are
+ * looking for a row or column for input then get the inpit
+ * change the value and return
+ */
 void getRowOrColumn(int *rowOrColumn, int isRow) {
   char tempString[MAX_INPUT_CHAR];
   
@@ -357,6 +408,9 @@ void getRowOrColumn(int *rowOrColumn, int isRow) {
   }
 }
 
+/* canPlacePiece
+ * checks if the user can place a piece in a given location
+ */
 int canPlacePiece (char gameBoard[SQUARE_CAP][SQUARE_CAP],int row,int column) {
   return gameBoard[row][column] == 'n';
 }
@@ -365,6 +419,12 @@ int canPlacePiece (char gameBoard[SQUARE_CAP][SQUARE_CAP],int row,int column) {
 // QUESTION 5 Function
 ///////////////////////////////////////////////////////////////////
 
+/* computer_move
+ * This executes the computers move. It tries to be random 3 times.
+ * If there is something in the location all three times then the
+ * computer will work its way backwards to check if there is something
+ * in there eventually finding the empty space to put a value.
+ */
 void computer_move(char gameBoard[SQUARE_CAP][SQUARE_CAP]) {
   int row, column;
 
@@ -395,6 +455,10 @@ void computer_move(char gameBoard[SQUARE_CAP][SQUARE_CAP]) {
 // QUESTION 6 Functions
 ///////////////////////////////////////////////////////////////////
 
+/* testSet
+ * This faction takes a set of 3 items and tests if they are all the same
+ * It then returns the char that they are all set to
+ */
 char testSet(char testArray[SQUARE_CAP]) {
   int counter = 1;
   if (testArray[0] != 'n') {
@@ -413,6 +477,10 @@ char testSet(char testArray[SQUARE_CAP]) {
   return 'n';
 }
 
+/* detect_win
+ * Tests the horizontals, verticals and diagonals for a win
+ * returns that X won, Y won, or there is no winner yet
+ */
 int detect_win(char gameBoard[SQUARE_CAP][SQUARE_CAP]) {
   char testArray[SQUARE_CAP];
   char testChar = 'n';
