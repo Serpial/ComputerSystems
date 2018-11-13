@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include <math.h>
 
 #define INST_SIZE 16+1
 
@@ -39,41 +40,40 @@ int getLength(char* bin) {
   }
 }
 
-int strBinToDec(char* bin) {
-  int count = getLength(bin);
-  int total=0;
-  int isNeg=0; // 0 if num is pos and 1 if num is neg
-  int length=getLength(bin);
+void decToBinBinStr(int dec, char* strToReturn) {
+  char bin[INST_SIZE];
 
-
+  // Make everything character the null character
+  for (int i=0; i<INST_SIZE; i++){
+    strToReturn[i]='\0';
+  }
   
-
   
-  if (length!=0) {
-    if (bin[0]=='1') {
-      isNeg = 1; 
-    }
-    
-    for (int i=0; i<length; i++) {
-      if (bin[i]=='0') bin[i]='1';
-      if (bin[i]=='1') bin[i]='0';
-    }
-    
-    
-    for (int i=1; i<length; i++) {
-      if (bin[i]=='1') {
-        total+=power(2, count);
-      }
+  // Find out if the number is negative
+  if (dec < 0) {
+    bin[0]='1';
+    fabs(dec); // Make the value positive
+    dec++;
+  }
+  else bin[0]='0';
+  for (int i=INST_SIZE-1; i>0 ; i--) {
+    if(power(2, i) <= dec) {
+        bin[i]='1';
+        bin-power(2,i);
+    } else {
+      bin[i]='0';
     }
   }
 
-  return total;
+  // Instead of returning a char*
+  strcpy(strToReturn, bin);
 }
 
+// Just used for testing
 int main(void) {
-  char something[INST_SIZE] = "0111";
+  char something[INST_SIZE];
   for (int i = 0; i < 10; i++){
-      addOne(something, 4);
-      printf("%s\n", something);
+    decToBinBinStr(i, something);
+    printf("%s\n", something);
   }
 }
