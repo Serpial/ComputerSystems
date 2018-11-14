@@ -1,79 +1,119 @@
 #include <stdio.h>
+#include <assert.h>
 #include <string.h>
 #include <math.h>
 
-#define INST_SIZE 16+1
+#define INST_SIZE 16
+void invertUpTo(char *bin, int upToElem);
 
-int power(int b, unsigned p) {
-  if (p==0) return 1;
-  int pow = power(b, p/2);
-  if (p&1) return b*pow*pow;
-  return pow*pow;
-}
+/* Only converts back up to 16 bit 2s-compliment
+ * To use simply put in a string of binary numbers
+ * and it will turn it into a positive or negative 
+ * number
+ */
+int binToDec(char* bin) {
+  int isNeg=0; // bool
+  int bitSize=0, total=0;
 
-void addOne(char* bin, int length) {
-  int i; // iterator
- 
-  for (i=length-1; i>=0; --i) {
-    if (bin[i]=='0') {
-      bin[i]='1';
+  // find out how long the binary string is
+  for (int i=0; i<INST_SIZE+1; i++) {
+    if (bin[i]=='\0') {
+      bitSize=i;
       break;
     }
   }
 
-  // work out why this logic is skipping 1st element.
-  if (i==0 && bin[1]=='1') {
-    for (++i;i<length; i++) {
-      bin[i]='0';
+  // Invert and add 1 if the number is negative
+  if (bin[0]=='1') {
+    invertUpTo(bin, bitSize);
+    isNeg=1;
+    // Now we need to add 1
+    for (int i=bitSize-1;i>0; i--) {
+      if (bin[i]=='0') {
+        bin[i]='1';
+        for (++i; i<bitSize; i++) {
+          bin[i]='0';
+        }
+        break;
+      }
     }
   }
-}
 
-// Works out the length of the string based on 1s and 0s
-int getLength(char* bin) {
-  int counter=0;
-  for(;;) {
-    if (bin[counter]!='1'&&bin[counter]!='0') {
-      return counter;
+  // Add all the numbers together
+  for (int i=1; i<bitSize;i++) {
+    if (bin[i]=='1') {
+      total+=pow(2,bitSize-i-1);
     }
-    counter++;
   }
+
+  // if the number is negative return the total
+  // minus two times the total else return total
+  return isNeg? (total-=(total*2)) : total;
 }
 
-void decToBinBinStr(int dec, char* strToReturn) {
-  char bin[INST_SIZE];
 
-  // Make everything character the null character
-  for (int i=0; i<INST_SIZE; i++){
-    strToReturn[i]='\0';
+/* arguements for this function are the decimal in
+ * which you wish to turn into 2s-complement bin and
+ * the number of bits you want to spread it across.
+ * For example (-38, 16) will give you:
+ * 1111111111011010
+ * (Does also produce positive numbers as well)
+ */
+char *decToBinStr(int dec, const int bitSize) {  
+  static char bin[INST_SIZE+1];
+  int isNeg=0;
+  int leastSigBit=bitSize;
+
+  // HALT if we are using a bigger decimal than
+  //    the bitsize can translate. For example,
+  //    4 bits can only get between 7 and -7
+  assert(dec<=pow(2,bitSize)-1);
+
+  if (bitSize!=INST_SIZE) {
+    bin[bitSize]='\0';
+  } else {
+    bin[INST_SIZE]='\0';
   }
   
+  // Make everything character the 0
+  for (int i=0; i<bitSize; i++){;
+    bin[i]='0';
+  }
   
   // Find out if the number is negative
   if (dec < 0) {
-    bin[0]='1';
-    fabs(dec); // Make the value positive
-    dec++;
+    isNeg=1;
+    dec=fabs(dec); // Make the value positive
   }
-  else bin[0]='0';
-  for (int i=INST_SIZE-1; i>0 ; i--) {
-    if(power(2, i) <= dec) {
-        bin[i]='1';
-        bin-power(2,i);
-    } else {
-      bin[i]='0';
+
+  // Turn a positive val into bin
+  for(int i=1; i<bitSize; i++) {
+    if(dec>=pow(2, bitSize-i-1)){
+      dec-=pow(2, bitSize-i-1);
+      bin[i]='1';
     }
   }
 
-  // Instead of returning a char*
-  strcpy(strToReturn, bin);
+  // Flip to neg representation
+  if (isNeg==1) {
+    // Now find the least significant bit
+    for(int i=bitSize-1; i>0; i--) {
+      if(bin[i]=='1') {
+        leastSigBit=i;
+        break;
+      }
+    }
+    invertUpTo(bin, leastSigBit);
+  }
+  return bin;
 }
 
-// Just used for testing
-int main(void) {
-  char something[INST_SIZE];
-  for (int i = 0; i < 10; i++){
-    decToBinBinStr(i, something);
-    printf("%s\n", something);
+void invertUpTo(char *bin, int upToElem) {
+  for (int i=0; i<upToElem; i++) {
+    if (bin[i]=='1') {
+      bin[i]='0';
+    } else {
+      bin[i]='1';
+    }
   }
 }
