@@ -7,7 +7,7 @@ void getMemFromFile(char *fileLocation, int16_t *memory, int maxMem) {
 
   FILE *fp;
   int counter=0;
-  char buffer[0xFF];
+  char buffer[20];
 
   fp=fopen(fileLocation, "r");
 

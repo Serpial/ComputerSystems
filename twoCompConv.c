@@ -14,7 +14,7 @@ void invertUpTo(char *bin, int upToElem);
 int binToDec(char* bin) {
   int isNeg=0; // bool
   int bitSize=0, total=0;
-
+  
   // find out how long the binary string is
   for (int i=0; i<INST_SIZE+1; i++) {
     if (bin[i]=='\0') {
@@ -22,10 +22,11 @@ int binToDec(char* bin) {
       break;
     }
   }
-
+  
   // Invert and add 1 if the number is negative
   if (bin[0]=='1') {
     invertUpTo(bin, bitSize);
+
     isNeg=1;
     // Now we need to add 1
     for (int i=bitSize-1;i>0; i--) {
@@ -39,6 +40,8 @@ int binToDec(char* bin) {
     }
   }
 
+  
+  
   // Add all the numbers together
   for (int i=1; i<bitSize;i++) {
     if (bin[i]=='1') {
@@ -47,8 +50,8 @@ int binToDec(char* bin) {
   }
 
   // if the number is negative return the total
-  // minus two times the total else return total
-  return isNeg? (total-=(total*2)) : total;
+  // minus two times the total else return total  
+  return isNeg? total-(total*2) : total;
 }
 
 
@@ -109,11 +112,16 @@ char *decToBinStr(int dec, const int bitSize) {
 }
 
 void invertUpTo(char *bin, int upToElem) {
-  for (int i=0; i<upToElem; i++) {
-    if (bin[i]=='1') {
-      bin[i]='0';
-    } else {
-      bin[i]='1';
+  char* p = bin;
+  
+  for (int i=0 ; i<upToElem; i++) {
+    if (*p=='1') {
+      *p = '0';
+    } else if (*p=='0'){
+      *p = '1';
+    } else if (*p=='\0') {
+      break;
     }
+    p++;
   }
 }
