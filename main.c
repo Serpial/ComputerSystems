@@ -151,15 +151,30 @@ void getMemFromFile(char *fileLocation) {
     FILE *fp; //file pointer
     int counter=0;
     char buffer[0xFF]; // 255 characters before buffer overload
+    char sub[0xFF];
+    int temp, tempOpc;
 
     // Opens the file the user has entered
     fp=fopen(fileLocation, "r");
 
     if (fp != NULL) { // checking if the file exists
         wipeMemory(); // Clear memory
-        while(fscanf(fp,"%20s",buffer) == 1) { // fscanf for making sure what comes is max 20 characters long 
-            memory[counter]=binToDec(buffer); // place it in that location in memory
-            counter++;
+        while(fscanf(fp,"%20s",buffer) == 1) { // fscanf for making sure what comes is max 20 characters long
+          for (int i=0; i<255;i++) {
+            sub[i]=buffer[i+3];
+          }
+
+
+          for (int i=1; i<4;i++) {
+            if (buffer[i]=='1') {
+              tempOpc+=pow(2,4-i-1);
+            }
+          }
+          temp = binToDec(sub);
+
+          
+          memory[counter]=        ; // place it in that location in memory
+          counter++;
         }
     } else {
         printf("This file does not exist\n");
@@ -190,7 +205,7 @@ void displayMemBin () {
 void wipeMemory() {
     int max= pow(2, BITS_NUM_WORDS-1);
     for (int i=0; i<max; i++) {
-        memory[i]=0;
+        memory[i]=-1;
     }
 }
 
