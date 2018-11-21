@@ -164,16 +164,19 @@ void getMemFromFile(char *fileLocation) {
             sub[i]=buffer[i+3];
           }
 
-
-          for (int i=1; i<4;i++) {
-            if (buffer[i]=='1') {
+          // Convert the opcode from binary
+          for (int i=0; i<4;i++) {
+            if (something[i]=='1') {
               tempOpc+=pow(2,4-i-1);
             }
           }
-          temp = binToDec(sub);
+
+          tempOpc= tempOpc<<12; // make space for the operand
+          temp = binToDec(sub); // convert the operand into 2scomp
+          tempOpc= tempOpc | temp; // bit wise 'or' the two together to merge
 
           
-          memory[counter]=        ; // place it in that location in memory
+          memory[counter]=tempOpc; // place it in that location in memory
           counter++;
         }
     } else {
