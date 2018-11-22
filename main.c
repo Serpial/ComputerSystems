@@ -4,59 +4,38 @@
 #include <math.h>
 #include "twoCompConv.h" // because it is a local file it is in double quotes instead of <>
 
+typedef struct {
+  unsigned int PC:12;
+  unsigned int MAR:12;
+  unsigned int IR:16;
+  unsigned int MB:16;
+  unsigned int AC:16;
+} Registers;
+
+
 #define INST_SIZE 16 // Size of an instruction
 #define OPCODE_SIZE 4 // Number of bits an opcode takes up
 #define BITS_NUM_WORDS 12+1 // 2^12=4096 plus 1 for twos comp
 
-int16_t memory[4096];
+int memory[4096];
+// To get the opcode from the int please use memory[i]>>12 (Using shifts)
+// to get the operand, please you memory[i]&0xFFF (Using 'and' masking)
+
+
 // Registers
-uint16_t registers[4];
-uint16_t* AC, IR, MB, PC; 
-int MAR; // Which has to be 12 bits long
-const char mnemonic[9][8]={"LOAD","STORE","SUBT","ADD","INPUT","OUTPUT","HALT","SKIPCOND"};
-const char negativeMnemonic[5][4]={"JUMP","MULT","ROR","ROL"};
-// negativeMnemonic[getDecOpcodeFromDec(<a number where the opcode is load>)+7]; to get JUMP and so on
+Registers registers
+const char mnemonic[12][9]={"LOAD","STORE","SUBT","ADD","INPUT",
+                           "OUTPUT","HALT","SKIPCOND","JUMP",
+                           "MULT","ROR","ROL"};
 
 // function prototypes
-void operation(int valueX, int AC);
+// void operation(int valueX, int AC);  // edited once we have fetch execute down
 void getMemFromFile(char *fileLocation);
 void wipeMemory(); // resets memory
 void displayMemBin(); // Displays memory in binary
 int validArgue (char *argv[]);
 void printHelp();
 
-////////////////////////////////////////////
-// Doesn't need to be kept, up to you Ismael
-////////////////////////////////////////////
-char* getAddressFromDec(int dec) {
-  char instruction[INST_SIZE+1];
-  static char address[INST_SIZE-OPCODE_SIZE+1];
-
-  strcpy(instruction, decToBinStr(dec,INST_SIZE));
-  
-  for (int i=0; i<INST_SIZE-4; i++) {
-    address[i]=instruction[i+4];
-  }
-  address[INST_SIZE-OPCODE_SIZE]='\0';
-  return address;
-}
-
-int getDecOpcodeFromDec(int dec) {
-  char instruction[INST_SIZE+1];
-  char opcode[OPCODE_SIZE+1];
-
-  strcpy(instruction, decToBinStr(dec,INST_SIZE));
-  
-  //gets the opcode in binary
-  for (int i=0; i<4; i++) {
-    opcode[i]=instruction[i];
-  }
-  opcode[OPCODE_SIZE]='\0';
-  
-  return binToDec(opcode);
-}
-/////////////////////////////////////////////////
-/////////////////////////////////////////////////
 
 /* main that takes in arguments -c, -d, -f, or 
  * --help (used to get a list of commands)
@@ -103,44 +82,57 @@ int main(int argc, char *argv[]) {
 
 /* run the operation from memory
  */
-void operation(int instruction, int valueX){
+int operation(){
   int valid=1; // bool
-  int opcode = getDecOpcodeFromDec(instruction);
+  int opcode = registers.IR >> 12;
   
+
   switch(opcode){
   case 0: // Load
-    AC = memory[valueX];
+    registers.AC = MB;
     break;
   case 1: // Store
-    memory[valueX] = AC;
+    memory[MAR] = registers.AC;
     break;
   case 2: // Subtract
-    AC = AC - valueX;
+    registers.AC = registers.AC - MB;
     break;
   case 3: // Add
-    AC = AC + valueX;
+    registers.AC = registers.AC + MB;
     break;
   case 4: // Input
+    printf("Enter input for AC: ");
+    scanf("%d", registers.InREG);
+    registers.AC = registers.InREG;
     break;
   case 5: // Output
+    registers.OutREG = registers.AC;
+    printf("AC is currently %d", registers.OutREG);
     break;
   case 6: // Halt
+    return 0;
     break;
   case 7: // Skipcond
+    // This is kind of what I was thinking: 
+    registers.PC += 1;
+    break;  
+  case 8: // Jump
+    registers.PC = MAR-1;
     break;
-  case -8: // Jump
+  case 9: // Mult
+    registers.AC = registers.AC * MB;
     break;
-  case -7: // Mult
-    AC = AC * valueX;
+  case 10: // ROR
+    registers.AC = registers.AC >> MAR;
     break;
-  case -6: // ROR
-    break;
-  case -5: // ROL
+  case 11: // ROL
+    registers.AC = registers.AC << MAR;
     break;
   default:
     printf("Not an opcode! \n");
     valid=0;
   }
+  //registers.PC += 1; in fetch/execute 
 }
 
 /* Given a file location in a string format, 
@@ -148,35 +140,33 @@ void operation(int instruction, int valueX){
  * the memory
  */
 void getMemFromFile(char *fileLocation) {
-    FILE *fp; //file pointer
+    FILE *fp=NULL; //file pointer
     int counter=0;
     char buffer[0xFF]; // 255 characters before buffer overload
     char sub[0xFF];
-    int temp, tempOpc;
+    int opcode=0;
 
     // Opens the file the user has entered
     fp=fopen(fileLocation, "r");
 
     if (fp != NULL) { // checking if the file exists
-        wipeMemory(); // Clear memory
+        // wipeMemory(); // Clear memory
         while(fscanf(fp,"%20s",buffer) == 1) { // fscanf for making sure what comes is max 20 characters long
-          for (int i=0; i<255;i++) {
-            sub[i]=buffer[i+3];
+          for (int i=0; i<0xFF;i++) {
+            sub[i]=buffer[i+4];
           }
 
           // Convert the opcode from binary
           for (int i=0; i<4;i++) {
-            if (something[i]=='1') {
-              tempOpc+=pow(2,4-i-1);
+            if (buffer[i]=='1') {
+              opcode+=pow(2,4-i-1);
             }
           }
+          // bit of bitmasking magic to join the opcode and the operand together
+          memory[counter]= opcode<<12 | binToDec2s(sub); 
 
-          tempOpc= tempOpc<<12; // make space for the operand
-          temp = binToDec(sub); // convert the operand into 2scomp
-          tempOpc= tempOpc | temp; // bit wise 'or' the two together to merge
-
-          
-          memory[counter]=tempOpc; // place it in that location in memory
+          // reset opcode and move onto next instruction
+          opcode=0;
           counter++;
         }
     } else {
@@ -196,8 +186,8 @@ void displayMemBin () {
 	char memLoc[BITS_NUM_WORDS+1], instruc[INST_SIZE+1];
 
 	while(memory[counter]!=0) {
-		strcpy(memLoc, decToBinStr(counter,BITS_NUM_WORDS));
-		strcpy(instruc, decToBinStr(memory[counter], INST_SIZE));
+		strcpy(memLoc, decToBinStr2s(counter,BITS_NUM_WORDS));
+		strcpy(instruc, decToBinStr2s(memory[counter], INST_SIZE));
 		printf("%s\t->\t%s\n", memLoc, instruc);
 		counter++;
 	}
