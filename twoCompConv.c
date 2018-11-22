@@ -46,10 +46,10 @@ char* decToBinStr(int dec, int bitSize) {
   for (int i=0; i<bitSize; i++){;
     bin[i]='0';
   }
-  
-  for(int i=1; i<bitSize; i++) {
+
+  for(int i=0; i<bitSize; i++) {
     if(dec>=pow(2, bitSize-i-1)){
-      dec-=pow(2, bitSize-i-1);
+      dec = dec - pow(2, bitSize-i-1);
       bin[i]='1';
     }
   }
@@ -87,16 +87,13 @@ int binToDec2s(char* bin) {
   }
 
   
-  total=binToDec(bin);
 
-  /*
   // Add all the numbers together
   for (int i=1; i<bitSize;i++) {
     if (bin[i]=='1') {
       total+=pow(2,bitSize-i-1);
     }
   }
-  */
 
   // if the number is negative return the total
   // minus two times the total else return total  
@@ -137,10 +134,8 @@ char *decToBinStr2s(int dec, const int bitSize) {
     isNeg=1;
     dec=fabs(dec); // Make the value positive
   }
-
-  strcpy(bin,decToBinStr(dec,bitSize));
   
-  /*
+  
   // Turn a positive val into bin
   for(int i=1; i<bitSize; i++) {
     if(dec>=pow(2, bitSize-i-1)){
@@ -148,7 +143,6 @@ char *decToBinStr2s(int dec, const int bitSize) {
       bin[i]='1';
     }
   }
-  */
 
   // Flip to neg representation
   if (isNeg==1) {
