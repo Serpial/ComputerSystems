@@ -11,7 +11,53 @@ void invertUpTo(char *bin, int upToElem);
  * and it will turn it into a positive or negative 
  * number
  */
-int binToDec(char* bin) {
+
+int binToDec(char *bin) {
+  // Get length
+  int bitSize=0, total=0;
+  for (int i=0; i<INST_SIZE+1; i++) {
+    if (bin[i]=='\0') {
+      bitSize=i;
+      break;
+    }
+  }
+
+  // Add all the numbers together
+  for (int i=0; i<bitSize;i++) {
+    if (bin[i]=='1') {
+      total+=pow(2,bitSize-i-1);
+    }
+  }
+
+  return total;
+}
+
+char* decToBinStr(int dec, int bitSize) {
+  // Turn a positive val into bin
+  static char bin[INST_SIZE+1];
+
+  if (bitSize!=INST_SIZE) {
+    bin[bitSize]='\0';
+  } else {
+    bin[INST_SIZE]='\0';
+  }
+  
+  // Make everything character the 0
+  for (int i=0; i<bitSize; i++){;
+    bin[i]='0';
+  }
+  
+  for(int i=1; i<bitSize; i++) {
+    if(dec>=pow(2, bitSize-i-1)){
+      dec-=pow(2, bitSize-i-1);
+      bin[i]='1';
+    }
+  }
+
+  return bin;
+}
+
+int binToDec2s(char* bin) {
   int isNeg=0; // bool
   int bitSize=0, total=0;
   
@@ -41,13 +87,16 @@ int binToDec(char* bin) {
   }
 
   
-  
+  total=binToDec(bin);
+
+  /*
   // Add all the numbers together
   for (int i=1; i<bitSize;i++) {
     if (bin[i]=='1') {
       total+=pow(2,bitSize-i-1);
     }
   }
+  */
 
   // if the number is negative return the total
   // minus two times the total else return total  
@@ -62,7 +111,7 @@ int binToDec(char* bin) {
  * 1111111111011010
  * (Does also produce positive numbers as well)
  */
-char *decToBinStr(int dec, const int bitSize) {  
+char *decToBinStr2s(int dec, const int bitSize) {  
   static char bin[INST_SIZE+1];
   int isNeg=0;
   int leastSigBit=bitSize;
@@ -89,6 +138,9 @@ char *decToBinStr(int dec, const int bitSize) {
     dec=fabs(dec); // Make the value positive
   }
 
+  strcpy(bin,decToBinStr(dec,bitSize));
+  
+  /*
   // Turn a positive val into bin
   for(int i=1; i<bitSize; i++) {
     if(dec>=pow(2, bitSize-i-1)){
@@ -96,6 +148,7 @@ char *decToBinStr(int dec, const int bitSize) {
       bin[i]='1';
     }
   }
+  */
 
   // Flip to neg representation
   if (isNeg==1) {
@@ -111,6 +164,8 @@ char *decToBinStr(int dec, const int bitSize) {
   return bin;
 }
 
+
+
 void invertUpTo(char *bin, int upToElem) {
   char* p = bin;
   
@@ -125,3 +180,4 @@ void invertUpTo(char *bin, int upToElem) {
     p++;
   }
 }
+
