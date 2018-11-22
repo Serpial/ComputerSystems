@@ -148,8 +148,9 @@ int operation(){
     return 0;
     break;
   case 7: // Skipcond
-    // This is kind of what I was thinking: 
-    registers.PC += 1;
+    if (ac>0) {
+      registers.PC += 1;
+    }
     break;  
   case 8: // Jump
     registers.PC = registers.MAR-1;
