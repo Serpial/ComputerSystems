@@ -290,7 +290,7 @@ int fillMemory(int argc, char *argv[]){
       if (argv[1][2]=='h' && argv[1][3]=='e' &&
           argv[1][4]=='l' && argv[1][5]=='p' && argv[1][6]=='\0') {
         printHelp();
-        return 1;
+        return 0;
       }
       return 0;
     case 'c':
