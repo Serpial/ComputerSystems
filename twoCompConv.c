@@ -175,3 +175,16 @@ void invertUpTo(char *bin, int upToElem) {
   }
 }
 
+
+int decTo2sDec(int dec) { 
+  char temp[17];
+  strcpy(temp,decToBinStr(dec,12));
+  return binToDec2s(temp);
+}
+
+int dec2sToDec (int dec) {
+  char temp[17];
+  strcpy(temp,decToBinStr2s(dec,12));
+  return binToDec(temp);
+}
+

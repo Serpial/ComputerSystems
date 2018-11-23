@@ -29,7 +29,7 @@ int memory[4096];
 // Registers
 Registers registers;
 const char mnemonic[12][9]={"LOAD","STORE","SUBT","ADD","INPUT","OUTPUT",
-                            "HALT","SKIPCOND","JUMP","MULT","ROR","ROL"};
+                            "HALT","SKIPCOND","JUMP","MULT","SRT","SLT"};
 
 // function prototypes
 // void operation(int valueX, int AC);  // edited once we have fetch execute down
@@ -42,13 +42,14 @@ int operation();
 int validArgue (char *argv[]);
 void printHelp();
 void machToAss();
+int fillMemory(int argc, char *argv[]);
 
 
 /* main that takes in arguments -c, -d, -f, or 
  * --help (used to get a list of commands)
  */
 int main(int argc, char *argv[]) {
-  int maxArg;
+  
 
   // init registers
   registers.PC=0;
@@ -60,56 +61,31 @@ int main(int argc, char *argv[]) {
   registers.OutREG=0;
   wipeMemory();
   
-  
-  
-  if (argc==1) {
-    printf("Please run --help to find out commands\n");
-    return 0;
-  }
-
-  maxArg=validArgue(argv);
-  
-  if (argc-1>maxArg) {
-    printf("You have entered an invalid argument or\
- too many arguments\n");
+  if (fillMemory(argc,argv)==0) {
     return 0;
   }
   
-  switch (maxArg) {
-  case 1:
-    switch(argv[1][1]){
-    case '-': // There is only one '--x' command right now -> --help
-      if (argv[1][2]=='h' && argv[1][3]=='e' &&
-                  argv[1][4]=='l' && argv[1][5]=='p') {
-        printHelp();
-        return 0;
-      }
-      break;
-    case 'c':
-      userInput();
-      break;
-    case 'd':
-      printf("This is what would happen in -d if we had written it yet\n");
-      break;
-    }
-  case 2:    
-    if (strcmp(argv[1], "-f")==0) {
-      if (!getMemFromFile(argv[2])) {
-        return 0; // if we are not able to find the file, close the program
-      }
-      break;
-    }
-  }
-
+  
   // Check if the user would like to display memory
+  if(displayMemAfterInput()){;
+    printf("\t--------------------\n");
+  }
+  machToAss();
+  printf("\t----RUNNING-CODE----\n");
+
+  int halt = 1;
+  while(halt){
+    registers.MAR = registers.PC;
+    registers.IR = memory[registers.MAR];
+    registers.PC++;
+    registers.MB = memory[registers.MAR];
+    halt = operation();
+  }
+
+
   displayMemAfterInput();
 
-
-
-
-
-
-  machToAss();
+  printf("\t--------------------\n");
   
   return 0;
 }
@@ -128,27 +104,28 @@ int operation(){
     memory[registers.MAR] = registers.AC;
     break;
   case 2: // Subtract
-    registers.AC = registers.AC - registers.MB;
+    registers.AC = dec2sToDec(decTo2sDec(registers.AC&0xFFF) - decTo2sDec(registers.MB&0xFFF));
     break;
   case 3: // Add
-    registers.AC = registers.AC + registers.MB;
+    registers.AC = dec2sToDec(decTo2sDec(registers.AC&0xFFF) + decTo2sDec(registers.MB&0xFFF));
     break;
   case 4: // Input
-    printf("Enter input for AC: ");
+    printf("Enter input for AC, in decimal: ");
     int temp;
     scanf("%d", &temp); // needed because you cant & a bitfield
-    registers.InREG=temp;
+    registers.InREG = dec2sToDec(temp);
     registers.AC = registers.InREG;
     break;
   case 5: // Output
     registers.OutREG = registers.AC;
-    printf("AC is currently %d", registers.OutREG);
+
+    printf("AC is currently %d\n", decTo2sDec(registers.OutREG&0xFFF));
     break;
   case 6: // Halt
-    return 0;
+    return 1;
     break;
   case 7: // Skipcond
-    if (ac>0) {
+    if (registers.AC>0) {
       registers.PC += 1;
     }
     break;  
@@ -156,7 +133,7 @@ int operation(){
     registers.PC = registers.MAR-1;
     break;
   case 9: // Mult
-    registers.AC = registers.AC * registers.MB;
+    registers.AC = dec2sToDec(decTo2sDec(registers.AC&0xFFF) * decTo2sDec(registers.MB&0xFFF));
     break;
   case 10: // ROR
     registers.AC = registers.AC >> registers.MAR;
@@ -167,7 +144,7 @@ int operation(){
   default:
     printf("Not an opcode! \n");
   }
-  //registers.PC += 1; in fetch/execute 
+  
 }
 
 void userInput() {
@@ -290,39 +267,50 @@ void wipeMemory() {
     }
 }
 
-
-/* Returns 2 if there are two valid arguments 
- * Returns 1 if there is one valid argument
- * Returns 0 if there are no valid arguments
+/*
+ * Returns 1 if we have successfully filled memory
+ * Returns 0 if the arguements the user has entered were incorrect
  */
-int validArgue (char *argv[]) {
-  switch (argv[1][1]) {
-  case '-':
-    if (argv[1][2]=='h' && argv[1][3]=='e' &&
-        argv[1][4]=='l' && argv[1][5]=='p') {
-      if (argv[1][6]=='\0') {
+int fillMemory(int argc, char *argv[]){
+  
+  if (argc==1) {
+    printf("Please run --help to find out commands\n");
+    return 0;
+  }
+  
+  if ((argv[1][1]=='f' && argc-1>2) || (argv[1][1]!='f' && argc-1>1)) {
+    printf("You have entered an invalid argument or\
+ too many arguments\n");
+    return 0;
+  }
+
+  if (argv[1][0]=='-') {
+    switch(argv[1][1]){
+    case '-': // There is only one '--x' command right now -> --help
+      if (argv[1][2]=='h' && argv[1][3]=='e' &&
+          argv[1][4]=='l' && argv[1][5]=='p' && argv[1][6]=='\0') {
+        printHelp();
         return 1;
       }
-    }
-    break;
-  case 'c':
-    if (argv[1][2] == '\0') {
+      return 0;
+    case 'c':
+      userInput();
       return 1;
+    case 'd':
+      printf("This is what would happen in -d if we had written it yet\n");
+      return 1;
+    case 'f':
+      if (!getMemFromFile(argv[2])) {
+        return 0; // if we are not able to find the file, close the program
+      } else {
+        return 1;
       }
-    break;
-  case 'd':
-    if (argv[1][2] == '\0') {
-      return 1;
-    }
-    break;
-  case 'f':
-    if (argv[1][2] == '\0') {      
-      return 2;
+      return 0;
     }
   }
   return 0;
-}
 
+}
 
 void machToAss(){
 
@@ -340,7 +328,7 @@ void machToAss(){
     
     printf("\t");
     printf("\t%s  ", mnemonic[opcode_2]);
-    printf("%d\n", operand_1);
+    printf("%d\n", decTo2sDec(operand_1));
   }
 }
 
