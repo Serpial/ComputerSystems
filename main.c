@@ -1,12 +1,44 @@
+/**************************************************************************
+ * Assessment Title: Assessed Coursework Exercise 3
+ *
+ *
+ * Number of Submitted C Files:  
+ *
+ * 
+ * Date: 
+ *
+ * 
+ * Authors: 
+ *	1. Paul Hutchison, Reg no: 201741535
+ *	2. Lucy Pennington, Reg no: 201707823
+ *	3. Ismael Ahmed, Reg no: YOUR_REGISTRATION_NUMBER
+ *	4. Christopher Reilly, Reg no: YOUR_REGISTRATION_NUMBER
+ *	5. YOUR_FULL_NAME, Reg no: YOUR_REGISTRATION_NUMBER
+ * 
+ *
+ *	Statement: We confirm that this submission is all our own work.
+ *
+ *      (Signed)_Paul_James_Hutchison_
+ *	
+ * 	(Signed)_____________________________________(YOUR_FULL_NAME)
+ *	
+ *	(Signed)_____________________________________(YOUR_FULL_NAME)
+ *	
+ *	(Signed)_____________________________________(YOUR_FULL_NAME)
+ *
+ *	(Signed)_____________________________________(YOUR_FULL_NAME)
+ *
+ **************************************************************************/
+
 #include <stdio.h>
 #include <stdint.h>
 #include <string.h>
-#include <math.h>
-#include "twoCompConv.h" // because it is a local file it is in double quotes instead of <>
+#include <math.h> // used for 'pow()' | Make sure to use -lm when compiling
+
+#include "twoCompConv.h" 
 
 #define INST_SIZE 16 // Size of an instruction
-#define OPCODE_SIZE 4 // Number of bits an opcode takes up
-#define BITS_NUM_WORDS 12+1 // 2^12=4096 plus 1 for twos comp
+#define INVALID_MEMORY_ITEM 12<<12 // There are opcodes 0 to 11. As soon as one uses 12 the whole istruction is invalid
 
 typedef struct {
   unsigned int PC:12;
@@ -20,19 +52,15 @@ typedef struct {
 
 
 
-
+// Registers
+Registers registers;
+////////////////////
 int memory[4096];
 // To get the opcode from the int please use memory[i]>>12 (Using shifts)
 // to get the operand, please you memory[i]&0xFFF (Using 'and' masking)
 
 
-// Registers
-Registers registers;
-const char mnemonic[12][9]={"LOAD","STORE","SUBT","ADD","INPUT","OUTPUT",
-                            "HALT","SKIPCOND","JUMP","MULT","SRT","SLT"};
-
 // function prototypes
-// void operation(int valueX, int AC);  // edited once we have fetch execute down
 int getMemFromFile(char *fileLocation);
 void wipeMemory(); // resets memory
 void displayMemBin(); // Displays memory in binary
@@ -43,6 +71,7 @@ int validArgue (char *argv[]);
 void printHelp();
 void machToAss();
 int fillMemory(int argc, char *argv[]);
+void placeDefaultInMem();
 
 
 /* main that takes in arguments -c, -d, -f, or 
@@ -59,7 +88,6 @@ int main(int argc, char *argv[]) {
   registers.AC=0;
   registers.InREG=0;
   registers.OutREG=0;
-  wipeMemory();
   
   if (fillMemory(argc,argv)==0) {
     return 0;
@@ -73,6 +101,7 @@ int main(int argc, char *argv[]) {
   machToAss();
   printf("\t----RUNNING-CODE----\n");
 
+  // Fetch/Execute
   int halt = 1;
   while(halt){
     registers.MAR = registers.PC;
@@ -94,7 +123,6 @@ int main(int argc, char *argv[]) {
  */
 int operation(){
   int opcode = registers.IR >> 12;
-  
 
   switch(opcode){
   case 0: // Load
@@ -135,18 +163,25 @@ int operation(){
   case 9: // Mult
     registers.AC = dec2sToDec(decTo2sDec(registers.AC&0xFFF) * decTo2sDec(registers.MB&0xFFF));
     break;
-  case 10: // ROR
+  case 10: // Sll
     registers.AC = registers.AC >> registers.MAR;
     break;
-  case 11: // ROL
+  case 11: // Sll
     registers.AC = registers.AC << registers.MAR;
     break;
+  case 12: // null location in memory
+    return 0;
   default:
     printf("Not an opcode! \n");
   }
   
 }
 
+/*
+ * Gets user input from console making sure
+ * to deal with some errors that the user may
+ * accidently cause.
+ */
 void userInput() {
   char binaryInput[INST_SIZE+1];
   int validEntry=1; // bool | assumes valid
@@ -181,13 +216,21 @@ void userInput() {
       return;
     } 
     
-    //check the format
+    // check the format
+    //    If it isn't all in binary,
     for (int i=0; i<INST_SIZE; i++) {
       if (binaryInput[i]!='1'&&binaryInput[i]!='0') {
         printf("SYNTAX ERROR : Something you entered was not quite right\n");
         validEntry=0;
         break;
       } 
+    }
+    //    If the opcode doesn't exist
+    if (validEntry) { // if the entry is in proper binary
+      if(binToDec(binaryInput)>=INVALID_MEMORY_ITEM) {
+        printf("SYNTAX EROR : The opcode you entered doesn't exist\n");
+        validEntry=0;
+      }
     }
 
     if (validEntry) {      
@@ -197,6 +240,11 @@ void userInput() {
   } 
 }
 
+/*
+ * A little recursive function that continues to ask
+ * if the would like to print memory until they enter 
+ * a syntatically correct answer.
+ */
 int displayMemAfterInput() {
   char entry[255];
   printf("Would you like to print memory? (y or n) :");
@@ -217,7 +265,8 @@ int displayMemAfterInput() {
  * search that location to get something to fill
  * the memory
  * 
- * also returns whether or not the action was a success.
+ * also returns whether or not the action was a success
+ * and -1 if there is a syntax error
  */
 int getMemFromFile(char *fileLocation) {
     FILE *fp=NULL; //file pointer
@@ -230,10 +279,13 @@ int getMemFromFile(char *fileLocation) {
     if (fp != NULL) { // checking if the file exists
         wipeMemory(); // Clear memory
         while(fscanf(fp,"%20s",buffer) == 1) { // fscanf for making sure what comes is max 20 characters long
-
-          memory[counter]= binToDec(buffer);
-          
-          counter++;
+          if (binToDec(buffer)>=INVALID_MEMORY_ITEM){
+            printf("SYNTAX ERROR :  Wrong opcode found on line %i\n", counter+1);
+            return 0;
+          } else {
+            memory[counter]= binToDec(buffer);
+            counter++;
+          }
         }
         fclose(fp);
         return 1;
@@ -251,20 +303,37 @@ int getMemFromFile(char *fileLocation) {
 void displayMemBin () {
   int counter=0;
   printf("Memory Location\t->\tInstruction\n"); // Heading
-  while(memory[counter]!=0) {
+  while(memory[counter]!=INVALID_MEMORY_ITEM) {
     printf("%s\t->\t", decToBinStr(counter, 12));
     printf("%s\n", decToBinStr(memory[counter],16));
     counter++;
   }
 }
 
-/* Empties memory making every value 0
+void placeDefaultInMem() {
+  wipeMemory();
+  // The jump and skip example
+  memory[0]=0x4000;    // 0100000000000000
+  memory[1]=0x7000;    // 0111000000000000
+  memory[2]=0x6000;    // 0110000000000000
+  memory[3]=0x2001;    // 0010000000000001
+  memory[4]=0x7000;    // 0111000000000000
+  memory[5]=0x8003;    // 1000000000000011
+  memory[6]=0x5000;    // 0101000000000000
+  memory[7]=0x6000;    // 0110000000000000
+
+}
+
+/* The default should be 12<<12 as twelve is the first invalid
+ * opcode and thus the decimal value in memory should always be 
+ * smaller. It is logically shifted left to push it into the
+ * location of the opcode
  */
 void wipeMemory() {
-    int max= pow(2, BITS_NUM_WORDS-1);
-    for (int i=0; i<max; i++) {
-        memory[i]=0;
-    }
+  int max= pow(2, 12);
+  for (int i=0; i<max; i++) {
+    memory[i]=INVALID_MEMORY_ITEM;  
+  }
 }
 
 /*
@@ -297,7 +366,7 @@ int fillMemory(int argc, char *argv[]){
       userInput();
       return 1;
     case 'd':
-      printf("This is what would happen in -d if we had written it yet\n");
+      placeDefaultInMem();
       return 1;
     case 'f':
       if (!getMemFromFile(argv[2])) {
@@ -312,23 +381,28 @@ int fillMemory(int argc, char *argv[]){
 
 }
 
-void machToAss(){
 
+/*
+ * Simply prints the opcode translate into assembly along side
+ * the operand of the instruction.
+ */
+void machToAss(){
   int operand_1;
   unsigned int opcode_2;
+  const char MNEMONIC[12][9]={"LOAD","STORE","SUBT","ADD","INPUT","OUTPUT",
+                              "HALT","SKIPCOND","JUMP","MULT","SRL","SLL"};  
   
   for (int i=0; i < 4096; i++){
-    
-    opcode_2 = memory[i]>>12;
-    operand_1 = memory[i]&0xFFF;
-
-    if (opcode_2==0 && operand_1==0) {
+    if (memory[i]!=INVALID_MEMORY_ITEM) {
+      opcode_2 = memory[i]>>12;
+      operand_1 = memory[i]&0xFFF;
+      
+      printf("\t");
+      printf("\t%s  ", MNEMONIC[opcode_2]);
+      printf("%d\n", decTo2sDec(operand_1));
+    } else {
       return;
     }
-    
-    printf("\t");
-    printf("\t%s  ", mnemonic[opcode_2]);
-    printf("%d\n", decTo2sDec(operand_1));
   }
 }
 
