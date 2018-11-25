@@ -4,7 +4,25 @@
 #include <math.h>
 
 #define INST_SIZE 16
-void invertUpTo(char *bin, int upToElem);
+
+/*
+ * takes in a binary string and turns a 1 into a 0,
+ * or vice versa, up to a set element in the string
+ */
+void invertUpTo(char *bin, int upToElem) {
+  char* p = bin;
+  
+  for (int i=0 ; i<upToElem; i++) {
+    if (*p=='1') {
+      *p = '0';
+    } else if (*p=='0'){
+      *p = '1';
+    } else if (*p=='\0') {
+      break;
+    }
+    p++;
+  }
+}
 
 /* Only converts back up to 16 bit 2s-compliment
  * To use simply put in a string of binary numbers
@@ -158,33 +176,25 @@ char *decToBinStr2s(int dec, const int bitSize) {
   return bin;
 }
 
-
-
-void invertUpTo(char *bin, int upToElem) {
-  char* p = bin;
-  
-  for (int i=0 ; i<upToElem; i++) {
-    if (*p=='1') {
-      *p = '0';
-    } else if (*p=='0'){
-      *p = '1';
-    } else if (*p=='\0') {
-      break;
-    }
-    p++;
-  }
-}
-
-
+/*
+ * finds out what the decimnal value would be if
+ * its binary value was in twos compliment
+ */
 int decTo2sDec(int dec) { 
   char temp[17];
   strcpy(temp,decToBinStr(dec,12));
   return binToDec2s(temp);
 }
 
+/*
+ * finds out what a postive or negative number in binary
+ * would be represented if it was unsigned.
+ */
 int dec2sToDec (int dec) {
   char temp[17];
   strcpy(temp,decToBinStr2s(dec,12));
   return binToDec(temp);
 }
+
+
 
