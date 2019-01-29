@@ -9,11 +9,7 @@
 /* Prototypes */
 char* switchHome(char* currentDir);
 char* buildPrefix(char* currentDir);
-void parseInput(char* instruction) {
-  
-}
-
-
+void parseInput(char* instruction);
 int main() {
   char currentPath[PATHSIZE];
   char instruction[MAX_INSTR];
@@ -56,4 +52,20 @@ char* buildPrefix(char* currentDir) {
   strcat(prefix, switchHome(currentDir));
   strcat(prefix, "$ ");
   return prefix;
+}
+
+void parseInput(char* instruction) {
+  char *phrase[75];
+  int counter=0;
+  char delim[] = " ";
+  char *ptr = strtok(instruction, delim);
+  
+  while (ptr != NULL) {
+    phrase[counter]=malloc(100);
+    strcpy (phrase[counter], ptr);
+    ptr = strtok(NULL, delim);
+    counter++;
+  }
+
+  if (strcmp(phrase[0],"exit")) exit(0);
 }
